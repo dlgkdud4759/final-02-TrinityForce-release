@@ -8,6 +8,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: pandoc/latex
+
+    strategy:
+      matrix:
+        repo:
+          - owner: OWNER_LHY
+            name: REPO_LHY
+            token: TOKEN_LHY
+            email: EMAIL_LHY
+          - owner: OWNER_CHOSIYEON
+            name: REPO_CHOSIYEON
+            token: TOKEN_CHOSIYEON
+            email: EMAIL_CHOSIYEON
+          - owner: OWNER_HAYEON
+            name: REPO_HAYEON
+            token: TOKEN_HAYEON
+            email: EMAIL_HAYEON
+
     steps:
       - uses: actions/checkout@v2
       - name: Install mustache (to update the date)
@@ -18,12 +35,12 @@ jobs:
         id: push_directory
         uses: cpina/github-action-push-to-another-repository@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.TOKEN_LHY }}
+          API_TOKEN_GITHUB: ${{ secrets[matrix.repo.token] }}
         with:
           source-directory: "output"
-          destination-github-username: dlgkdud4759
-          destination-repository-name: final-02-TrinityForce-release
-          user-email: ${{ secrets.EMAIL_LHY }}
+          destination-github-username: ${{ matrix.repo.owner }}
+          destination-repository-name: ${{ matrix.repo.name }}
+          user-email: ${{ secrets[matrix.repo.email] }}
           commit-message: ${{ github.event.commits[0].message }}
           target-branch: main
       - name: Test get variable exported by push-to-another-repository

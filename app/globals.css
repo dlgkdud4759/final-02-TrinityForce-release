@@ -29,6 +29,9 @@
   /* 배경 색상 */
   --color-bg-primary: #efe3d3;
 
+  /* 모달 배경 색상 */
+  --color-bg-modal: #f5efe6;
+
   /* 포인트 색상 (브라운) */
   --color-brown-accent: #966e4f;
   --color-brown-guide: #ad8e76;

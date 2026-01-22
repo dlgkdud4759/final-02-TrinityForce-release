@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import { BackIcon } from "@/app/components/icons/Back";
+import React, { useEffect } from 'react';
+import { BackIcon } from '@/app/components/icons/Back';
 
 type ModalProps = {
-  isOpen: boolean;          
-  onClose: () => void;      
+  isOpen: boolean;
+  onClose: () => void;
   children: React.ReactNode; // 모달 안 내용
-  className?: string;       // 모달 박스 스타일 추가
+  className?: string; // 모달 박스 스타일 추가
 };
 
 export default function Modal({
   isOpen,
   onClose,
   children,
-  className = "",
+  className = '',
 }: ModalProps) {
   // ESC로 닫기
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -36,9 +36,9 @@ export default function Modal({
       {/* 모달 박스 */}
       <div
         className={[
-          "relative z-10 w-full max-w-[500px] max-h-[80vh] overflow-y-auto rounded-2xl bg-bg-primary p-6",
+          'relative z-10 w-full max-w-[500px] max-h-[80vh] overflow-y-auto rounded-2xl bg-bg-modal p-6',
           className,
-        ].join(" ")}
+        ].join(' ')}
         // 박스 클릭하면 안 닫히게
         onClick={(e) => e.stopPropagation()}
       >

@@ -15,9 +15,9 @@ export default function EmptyState({ title, description, className = "" }: Props
         className,
       ].join(" ")}
     >
-      <p className="text-xl font-bold text-[var(--color-gray-dark)]">{title}</p>
+      <p className="text-xl font-bold text-gray-dark">{title}</p>
       {description && (
-        <p className="mt-2 text-sm text-[var(--color-gray-medium)]">{description}</p>
+        <p className="mt-2 text-sm text-gray-medium">{description}</p>
       )}
     </div>
   );

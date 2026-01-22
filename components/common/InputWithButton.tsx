@@ -31,10 +31,10 @@ export default function InputWithButton({
         className="
           w-[353px] h-[56px]
           px-4 pr-24
-          rounded-xl border border-[#966E4F]
-          text-base text-[#333333] placeholder:text-[#767676]
+          rounded-xl border border-[var(--color-brown-accent)]
+          text-base text-[var(--color-font-dark)] placeholder:text-[var(--color-gray-dark)]
           bg-white
-          outline-none focus:border-[#AD8E76] focus:ring-1 focus:ring-[#AD8E76]
+          outline-none focus:border-[var(--color-brown-guide)] focus:ring-1 focus:ring-[var(--color-brown-guide)]
           transition
         "
       />
@@ -46,9 +46,9 @@ export default function InputWithButton({
           absolute right-3 top-1/2 -translate-y-1/2
           h-[32px] px-3
           rounded-full
-          bg-[#8B6A4E]
-          text-xs text-white
-          hover:bg-[#7A5C43]
+          bg-[var(--color-brown-accent)]
+          text-xs text-[var(--color-font-white)]
+          hover:bg-[var(--color-brown-guide)]
           transition
         "
       >

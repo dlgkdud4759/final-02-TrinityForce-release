@@ -18,10 +18,10 @@ export default function EmailInput({
       className="
         w-[353px] h-[56px]
         px-4
-        rounded-xl border border-[#966E4F]
-        text-base text-[#333333] placeholder:text-[#767676]
+        rounded-xl border border-[var(--color-brown-accent)]
+        text-base text-[var(--color-font-dark)] placeholder:text-[var(--color-gray-dark)]
         bg-white
-        outline-none focus:border-[#AD8E76] focus:ring-1 focus:ring-[#AD8E76]
+        outline-none focus:border-[var(--color-brown-guide)] focus:ring-1 focus:ring-[var(--color-brown-guide)]
         transition
       "
     />

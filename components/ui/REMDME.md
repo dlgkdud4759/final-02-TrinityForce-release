@@ -22,13 +22,13 @@ export default function Example() {
         <div className="space-y-4 text-center">
           <h2 className="text-lg font-semibold">모달 테스트</h2>
 
-          <p className="text-sm text-[#767676]">
+          <p className="text-sm text-gray-dark">
             모달 안에 들어가는 내용
           </p>
 
           <button
             onClick={() => setOpen(false)}
-            className="w-full h-[56px] rounded-xl bg-[#8B6A4E] text-white"
+            className="w-full h-[56px] rounded-xl bg-brown-accent text-font-white"
           >
             닫기
           </button>

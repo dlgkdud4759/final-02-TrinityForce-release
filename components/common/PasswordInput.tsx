@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import { EyeIcon } from "@/app/components/icons/Eye";
+import { EyeOffIcon } from "@/app/components/icons/EyeOff";
 
 
-const OPEN_EYE_ICON = "/icons/eye/eye-open.svg";
-const CLOSED_EYE_ICON = "/icons/eye/eye-close.svg";
 
 type Props = {
   value: string;
@@ -38,11 +38,12 @@ export default function PasswordInput({ value, onChange }: Props) {
         className="absolute right-3 top-1/2 -translate-y-1/2"
         aria-label={show ? "비밀번호 숨기기" : "비밀번호 보기"}
       >
-        <img
-          src={show ? OPEN_EYE_ICON : CLOSED_EYE_ICON}
-          alt=""
-          className="w-6 h-6"
-        />
+        {show ? (
+          <EyeIcon className="w-6 h-6"></EyeIcon>
+        ) : (
+          <EyeOffIcon className="w-6 h-6"></EyeOffIcon>
+        )
+        }
       </button>
     </div>
   );

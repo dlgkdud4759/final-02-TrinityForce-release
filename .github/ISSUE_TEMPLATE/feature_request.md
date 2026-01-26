@@ -1,9 +1,9 @@
 ---
-name: CFS Issue Template
-about: 멋쟁이 사자처럼 15기 CFS 이슈 템플릿입니다.
-title: ""
-labels: ""
-assignees: ""
+name: TrinityForce Issue Template
+about: 멋쟁이 사자처럼 15기 TrinityForce Issue 이슈 템플릿입니다.
+title: ''
+labels: ''
+assignees: ''
 ---
 
 ## 🛠️ 구현 예정

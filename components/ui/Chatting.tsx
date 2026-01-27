@@ -9,7 +9,7 @@ export default function Chatting({ isMine = false }: ChattingProps) {
   const balloonClass = isMine
     ? 'rounded-tl-xl rounded-b-xl bg-brown-accent'
     : 'rounded-tr-xl rounded-b-xl bg-brown-guide';
-  const textColorClass = isMine ? 'text-font-light' : 'text-font-dark';
+  const textColorClass = 'text-font-white';
   const timeAlignClass = isMine ? 'text-right' : 'text-left';
   const contentWrapperClass = isMine
     ? 'flex gap-1 items-center pt-3.5'

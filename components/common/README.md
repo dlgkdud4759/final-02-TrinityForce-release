@@ -190,3 +190,56 @@ export default function SearchResults({ query, results }) {
 - `title`은 필수 props입니다.
 - `description`은 선택사항이며, 생략 가능합니다.
 - 페이지 중앙에 표시되므로 별도 컨테이너 필요 없습니다.
+
+
+
+
+
+---
+
+# SearchInput 컴포넌트 사용 가이드
+
+## 📌 개요
+검색창 + 카테고리 선택이 합쳐진 컴포넌트
+
+## 🚀 사용 방법
+
+### 1. 기본 사용 (카테고리: 전체, 소설, 에세이)
+<SearchInput />
+
+### 2. placeholder 바꾸기
+<SearchInput placeholder="검색어를 입력하세요" />
+
+### 3. 카테고리 바꾸고 싶으면
+<SearchInput 
+  categories={["전체", "소설", "에세이", "인문", "경제", "공포"]} 
+/>
+주의: 원하는 카테고리 전부 다 적어야 합니다. (기본값이 사라짐)
+
+### 4. 검색 기능 연결 (동작 구현할 때)
+'use client';
+import { useState } from 'react';
+import SearchInput from '@/components/common/SearchInput';
+
+export default function SearchPage() {
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleSearch = (value, category) => {
+    console.log('검색:', value, '카테고리:', category);
+  };
+
+  return (
+    <SearchInput
+      value={searchValue}
+      onChange={(e) => setSearchValue(e.target.value)}
+      onSearch={handleSearch}
+    />
+  );
+}
+
+### 5. 가운데 정렬
+<div className="min-h-screen bg-bg-primary px-4 py-10">
+  <div className="max-w-[680px] mx-auto">
+    <SearchInput />
+  </div>
+</div>

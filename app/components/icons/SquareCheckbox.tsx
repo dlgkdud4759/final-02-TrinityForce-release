@@ -25,7 +25,7 @@ export function SquareCheckboxIcon({ className }: { className?: string }) {
           width="30"
           height="30"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feColorMatrix
             in="SourceAlpha"

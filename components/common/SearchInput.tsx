@@ -7,6 +7,8 @@ type SearchInputProps = {
   value?: string
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSearch?: (value: string, category: string) => void
+  onFocus?: () => void
+  onBlur?: () => void
   placeholder?: string
   categories?: string[]  // ["공통", "책제목", "저자" 등]
 }
@@ -15,6 +17,8 @@ export default function SearchInput({
   value = "",
   onChange,
   onSearch,
+  onFocus,
+  onBlur,
   placeholder = "검색어를 입력하세요",
   categories = ["전체", "소설", "시/에세이", "자기계발", "요리", "만화", "아동"]
 }: SearchInputProps) {
@@ -46,6 +50,8 @@ export default function SearchInput({
         type="text"
         value={value}
         onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
         className="flex-1 px-3 text-sm text-font-dark placeholder:text-gray-dark bg-transparent outline-none"
       />

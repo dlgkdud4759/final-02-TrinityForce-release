@@ -66,8 +66,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* 헤더 */}
-      <HeaderMain />
 
       {/* 게시글 목록 */}
       <main className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-24">
@@ -109,9 +107,6 @@ export default function Home() {
           ))}
         </div>
       </main>
-
-      {/* 네비게이션 */}
-      <Navigation />
     </div>
   );
 }

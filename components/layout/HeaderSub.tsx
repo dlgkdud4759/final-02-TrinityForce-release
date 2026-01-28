@@ -7,7 +7,7 @@ interface HeaderSubProps {
 
 export default function HeaderSub({ title = '헤더' }: HeaderSubProps) {
   return (
-    <header className="flex items-center justify-between h-15 px-4 bg-bg-primary">
+    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-15 px-4 bg-bg-primary">
       {/* 왼쪽 뒤로가기 */}
       <Link href="/" >
         <ChevronLeft size={32}/>

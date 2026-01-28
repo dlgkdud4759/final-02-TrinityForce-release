@@ -1,7 +1,5 @@
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
-import HeaderMain from '@/components/layout/HeaderMain';
-import Navigation from '@/components/layout/Navigation';
 
 export default function Home() {
   // 더미 데이터

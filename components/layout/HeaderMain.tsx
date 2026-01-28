@@ -19,9 +19,9 @@ export default function HeaderMain() {
       {/* 오른쪽 아이콘 영역 */}
       <div className="flex items-center gap-3">
         {/* 위치 재설정 버튼 */}
-        <button type="button" aria-label="위치 설정" className="cursor-pointer">
+        <Link href="/location" aria-label="위치 설정" className="cursor-pointer">
           <MapPin size={24} className="text-font-dark" />
-        </button>
+        </Link>
 
         {/* 알림 버튼 */}
         <button type="button" aria-label="알림" className="relative cursor-pointer">

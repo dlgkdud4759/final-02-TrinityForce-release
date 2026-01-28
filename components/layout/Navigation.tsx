@@ -35,22 +35,24 @@ export default function NavigationBar() {
         </Link>
 
         {/* 채팅 버튼 */}
-        <button
+        <Link
+          href="/chat"
           type="button"
           className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
           aria-label="채팅"
         >
           <MessageSquareMore size={24} className="md:w-7 md:h-7" />
-        </button>
+        </Link>
 
         {/* 마이페이지 버튼 */}
-        <button
+        <Link
+          href="/mypage"
           type="button"
           className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
           aria-label="마이페이지"
         >
           <User size={24} className="md:w-7 md:h-7" />
-        </button>
+        </Link>
       </div>
     </nav>
   );

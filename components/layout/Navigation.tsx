@@ -26,7 +26,7 @@ export default function NavigationBar() {
 
         {/* 게시글 작성 버튼 */}
         <Link
-          href="/BookRegistration"
+          href="/book-registration"
           type="button"
           className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
           aria-label="게시글 작성"

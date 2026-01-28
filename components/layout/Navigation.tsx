@@ -25,13 +25,14 @@ export default function NavigationBar() {
         </Link>
 
         {/* 게시글 작성 버튼 */}
-        <button
+        <Link
+          href="/BookRegistration"
           type="button"
           className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
           aria-label="게시글 작성"
         >
           <FilePlus size={24} className="md:w-7 md:h-7" />
-        </button>
+        </Link>
 
         {/* 채팅 버튼 */}
         <button

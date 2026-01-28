@@ -6,7 +6,7 @@ import Navigation from '@/components/layout/Navigation';
 import { LocationModalProvider } from '@/contexts/LocationModalContext';
 
 // HeaderMain을 숨길 페이지 경로들
-const hideHeaderMainPaths = ['/meetup', '/location'];
+const hideHeaderMainPaths = ['/meetup', '/location', '/book-detail'];
 
 export default function LayoutWrapper({
   children,

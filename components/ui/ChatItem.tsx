@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function ChatItem() {
   return (
-    <Link href="/">
+    <Link href="/chat/roomId">
       <article className="flex items-center mx-4 my-3">
         <Image
           className="shrink-0 w-10.5 h-10.5 rounded-lg bg-border-primary"

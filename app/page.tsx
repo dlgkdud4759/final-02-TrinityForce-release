@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
-import HeaderMain from '@/components/layout/HeaderMain';
-import Navigation from '@/components/layout/Navigation';
+import Link from 'next/link';
 
 export default function Home() {
   // 더미 데이터
@@ -71,10 +70,14 @@ export default function Home() {
       <main className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-24">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {posts.map((post) => (
-            <div key={post.id} className="bg-white rounded-lg overflow-hidden">
+            <Link
+              key={post.id}
+              href="/book-detail"
+              className="bg-white rounded-lg overflow-hidden block cursor-pointer hover:shadow-md transition-shadow"
+            >
               
               {/* 이미지 */}
-              <div className="relative aspect-[3/4] bg-gray-100">
+              <div className="relative aspect-3/4 bg-gray-100">
                 
                 <Image
                   src={post.image}
@@ -103,7 +106,7 @@ export default function Home() {
                   {post.createdAt}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </main>

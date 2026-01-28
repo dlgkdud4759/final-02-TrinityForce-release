@@ -1,6 +1,5 @@
 import './globals.css';
-import HeaderMain from '@/components/layout/HeaderMain';
-import Navigation from '@/components/layout/Navigation';
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
 
 export default function RootLayout({
   children,
@@ -10,9 +9,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <HeaderMain />
-        {children}
-        <Navigation />
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

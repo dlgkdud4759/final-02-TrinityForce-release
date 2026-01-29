@@ -46,7 +46,7 @@ export default function NavigationBar() {
 
         {/* 마이페이지 버튼 */}
         <Link
-          href="/mypage"
+          href="/user/mypage"
           type="button"
           className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
           aria-label="마이페이지"

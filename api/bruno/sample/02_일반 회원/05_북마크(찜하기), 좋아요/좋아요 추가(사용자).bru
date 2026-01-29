@@ -1,0 +1,19 @@
+meta {
+  name: 좋아요 추가(사용자)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{url}}/bookmarks/user
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "target_id": 2,
+      "memo": "항상 배송도 빨리해주고 좋습니다.",
+      "is_like": true
+  }
+}

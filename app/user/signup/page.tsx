@@ -142,7 +142,7 @@ export default function SignUpPage() {
         email: trimmedEmail,
         password,
         name: trimmedName,
-        type: 'user'
+        type: 'seller'
       })
 
       console.log('회원가입 응답:', response.data)

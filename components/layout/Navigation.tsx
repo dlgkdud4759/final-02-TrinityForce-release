@@ -14,7 +14,7 @@ export default function NavigationBar() {
   // 게시글 작성 클릭
   const goToCreatePost = () => {
     checkAuth(() => {
-      router.push('book-registration');
+      router.push('/book-registration');
     });
   };
 

@@ -219,16 +219,49 @@ export default function DetailPage() {
               </button>
             </div>
 
-            {/* 5x4 표 */}
-            <div className="mt-4 overflow-hidden rounded-lg border border-gray-lighter">
-              <div className="grid grid-cols-5">
-                {Array.from({ length: 20 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-12 border-b border-r border-gray-lighter last:border-r-0"
-                  />
-                ))}
-              </div>
+            {/* 5x5 표 */}
+            <div className="mt-4 overflow-hidden rounded-lg border border-gray-lighter overflow-x-auto">
+              <table className="w-full text-[8px] text-font-dark">
+                <thead>
+                  <tr>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[50px]">구분</th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[140px]">헌 상태</th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[150px]">표지</th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[140px]">책등 / 책배</th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-gray-lighter min-w-[160px]">내부 / 제본상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">최상</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top">새것에 가까운 책</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 찢어진 흔적 없음\n닳은 흔적 없음, 낙서 없음\n얼룩 없음, 양장본의 겉표지 있음`}</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 낙서 없음\n닳은 흔적 없음, 얼룩 없음`}</td>
+                    <td className="p-2 border-b border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 낙서 없음, 변형 없음\n얼룩 없음, 접힌 흔적 없음\n제본 탈착 없음`}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">상</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top">약간의 사용감은 있으나 깨끗한 책</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`희미한 변색이나 작은 얼룩이 있음\n찢어진 흔적 없음\n약간의 모서리 해짐\n낙서 없음, 양장본의 겉표지 있음`}</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`희미한 변색이나 작은 얼룩이 있음\n약간의 닳은 흔적 있음\n낙서 없음`}</td>
+                    <td className="p-2 border-b border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 낙서 없음, 변형 없음\n아주 약간의 접힌 흔적 있음\n얼룩 없음, 제본 탈착 없음`}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">중</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top">사용감이 많으며 헌 느낌이 나는 책</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`전체적인 변색, 모서리 해짐 있음\n2cm 이하의 찢어짐, 오염 있음\n낙서 있음, 양장본의 겉표지 없음`}</td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`전체적인 변색, 모서리 해짐 있음\n오염 있음, 낙서 있음(이름 포함)`}</td>
+                    <td className="p-2 border-b border-gray-lighter align-top whitespace-pre-line">{`변색 있음, 2cm 이하 찢어짐 있음\n5쪽 이하의 필기 및 밑줄 있음\n얼룩 및 오염 있음, 제본 탈착 없음`}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-brown-accent text-font-white p-2 border-r border-gray-lighter text-center font-medium">매입불가</td>
+                    <td className="p-2 border-r border-gray-lighter align-top">독서 및 이용에 지장이 있는 책</td>
+                    <td className="p-2 border-r border-gray-lighter align-top whitespace-pre-line">{`2cm 초과한 찢어짐 있음\n심한 오염 및 낙서 있음\n물에 젖은 흔적 있음`}</td>
+                    <td className="p-2 border-r border-gray-lighter align-top whitespace-pre-line">{`심한 오염 있음, 심한 낙서 있음\n물에 젖은 흔적 있음`}</td>
+                    <td className="p-2 border-gray-lighter align-top whitespace-pre-line">{`2cm 초과한 찢어짐, 5쪽 초과 낙서\n심한 오염 이나 젖은 흔적 있음\n낙장 등의 제본불량, 분책 된 경우`}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
             <p className="mt-3 text-[14px] font-medium text-red-dark">

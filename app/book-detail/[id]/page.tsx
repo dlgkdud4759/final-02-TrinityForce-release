@@ -10,22 +10,22 @@ import HeaderSub from '@/components/layout/HeaderSub';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
 
-interface PostData {
+interface ProductData {
   _id: number;
-  type: string;
-  title: string;
+  seller_id: number;
+  name: string;
   content: string;
-  image?: string;
+  mainImages?: { path: string; name: string }[];
   createdAt: string;
   updatedAt: string;
-  views: number;
-  user: {
+  seller?: {
     _id: number;
     name: string;
     image?: string;
   };
   bookmarks?: number;
   extra?: {
+    isBook?: boolean;
     author?: string;
     condition?: '최상' | '상' | '중';
     category?: string;
@@ -41,7 +41,7 @@ export default function BookDetailPage() {
   const titleCls = 'text-[22px] font-medium text-font-dark';
   const dividerCls = 'border-t border-gray-lighter';
 
-  const [post, setPost] = useState<PostData | null>(null);
+  const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
@@ -49,10 +49,10 @@ export default function BookDetailPage() {
 
   // 데이터 불러오기
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_URL}/posts/${id}`, {
+        const res = await fetch(`${API_URL}/products/${id}`, {
           headers: {
             'client-id': CLIENT_ID || '',
           },
@@ -60,20 +60,20 @@ export default function BookDetailPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.message || '게시글을 불러오는데 실패했습니다.');
+          throw new Error(data.message || '도서 정보를 불러오는데 실패했습니다.');
         }
 
-        setPost(data.item);
+        setProduct(data.item);
       } catch (err) {
-        console.error('게시글 조회 실패:', err);
-        setError('게시글을 불러오는데 실패했습니다.');
+        console.error('도서 조회 실패:', err);
+        setError('도서 정보를 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
     };
 
     if (id) {
-      fetchPost();
+      fetchProduct();
     }
   }, [id]);
 
@@ -97,7 +97,7 @@ export default function BookDetailPage() {
     );
   }
 
-  if (error || !post) {
+  if (error || !product) {
     return (
       <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center gap-4">
         <p className="text-font-dark">{error || '게시글을 찾을 수 없습니다.'}</p>
@@ -137,11 +137,11 @@ export default function BookDetailPage() {
                 />
               </button>
               <span className="text-[16px] font-medium text-gray-medium">
-                {liked ? (post.bookmarks || 0) + 1 : (post.bookmarks || 0)}
+                {liked ? (product.bookmarks || 0) + 1 : (product.bookmarks || 0)}
               </span>
             </div>
             <p className="mt-1 text-[14px] font-medium text-gray-dark">
-              {formatDate(post.createdAt)}
+              {formatDate(product.createdAt)}
             </p>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function BookDetailPage() {
         <h3 className={titleCls}>도서명</h3>
         <div className="mt-3">
           <p className="w-full rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark">
-            {post.title}
+            {product.name}
           </p>
         </div>
       </div>
@@ -160,13 +160,13 @@ export default function BookDetailPage() {
       <div className={dividerCls} />
 
       {/* 저자 */}
-      {post.extra?.author && (
+      {product.extra?.author && (
         <>
           <div className="px-4 py-4 max-w-6xl mx-auto">
             <h3 className={titleCls}>저자</h3>
             <div className="mt-3">
               <p className="w-full rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark">
-                {post.extra.author}
+                {product.extra.author}
               </p>
             </div>
           </div>
@@ -176,21 +176,23 @@ export default function BookDetailPage() {
       )}
 
       {/* 도서 사진 */}
-      {post.image && (
+      {product.mainImages && product.mainImages.length > 0 && (
         <>
           <div className="px-4 py-4 max-w-6xl mx-auto">
             <h3 className={titleCls}>도서 사진</h3>
 
             {/* 가로 슬라이드 */}
             <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
-              <div className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter">
-                <Image
-                  src={getImageUrl(post.image)}
-                  alt={post.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              {product.mainImages.map((img, idx) => (
+                <div key={idx} className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter">
+                  <Image
+                    src={getImageUrl(img.path)}
+                    alt={`${product.name} ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -203,7 +205,7 @@ export default function BookDetailPage() {
         <h3 className={titleCls}>설명</h3>
         <div className="mt-3">
           <p className="w-full min-h-[120px] rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark whitespace-pre-wrap">
-            {post.content}
+            {product.content}
           </p>
         </div>
       </div>
@@ -230,7 +232,7 @@ export default function BookDetailPage() {
               key={cond}
               className={[
                 'px-4 py-2 rounded-lg border text-[16px] font-medium',
-                post.extra?.condition === cond
+                product.extra?.condition === cond
                   ? 'text-font-dark border-brown-accent'
                   : 'text-gray-dark border-gray-lighter',
               ].join(' ')}
@@ -251,16 +253,16 @@ export default function BookDetailPage() {
           <div className="flex items-start gap-3">
             {/* 프로필 이미지 */}
             <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-200 shrink-0">
-              {post.user.image ? (
+              {product.seller?.image ? (
                 <Image
-                  src={getImageUrl(post.user.image)}
-                  alt={post.user.name}
+                  src={getImageUrl(product.seller.image)}
+                  alt={product.seller.name}
                   fill
                   className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-500 text-lg font-bold">
-                  {post.user.name.charAt(0)}
+                  {product.seller?.name?.charAt(0) || '?'}
                 </div>
               )}
             </div>
@@ -269,7 +271,7 @@ export default function BookDetailPage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[16px] font-semibold text-font-dark">
-                  {post.user.name}
+                  {product.seller?.name || '판매자'}
                 </span>
 
                 <div className="flex items-center gap-1">

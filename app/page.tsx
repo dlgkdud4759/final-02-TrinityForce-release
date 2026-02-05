@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import SearchInput from '@/components/common/SearchInput';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -32,6 +33,8 @@ interface Product {
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchCategory, setSearchCategory] = useState('전체');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,6 +71,30 @@ export default function Home() {
     return `${API_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
   };
 
+  const handleSearch = (value: string, category: string) => {
+    setSearchQuery(value);
+    setSearchCategory(category);
+  };
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      searchCategory === '전체' || product.extra?.category === searchCategory;
+
+    if (!normalizedQuery) return matchesCategory;
+
+    const name = product.name?.toLowerCase() || '';
+    const content = product.content?.toLowerCase() || '';
+    const author = product.extra?.author?.toLowerCase() || '';
+
+    const matchesQuery =
+      name.includes(normalizedQuery) ||
+      content.includes(normalizedQuery) ||
+      author.includes(normalizedQuery);
+
+    return matchesCategory && matchesQuery;
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -78,12 +105,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* 검색창 */}
+      <div className="px-4 pt-4 md:px-6 md:pt-6 max-w-6xl mx-auto">
+        <SearchInput
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onSearch={handleSearch}
+          placeholder="도서를 검색하세요."
+        />
+      </div>
 
       {/* 도서 목록 */}
       <main className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-24">
-        {products.length === 0 ? (
+        {filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-font-dark text-lg">등록된 도서가 없습니다.</p>
+            <p className="text-font-dark text-lg">
+              {products.length === 0 ? '등록된 도서가 없습니다.' : '검색 결과가 없습니다.'}
+            </p>
             <Link
               href="/book-registration"
               className="mt-4 px-4 py-2 bg-brown-accent text-font-white rounded-lg"
@@ -93,7 +131,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <Link
                 key={product._id}
                 href={`/book-detail/${product._id}`}

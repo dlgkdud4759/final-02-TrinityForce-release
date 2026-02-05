@@ -3,13 +3,23 @@
 
 import Link from 'next/link';
 import { House, Users, FilePlus, MessageSquareMore, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useRequireAuth } from '@/app/hooks/useRequireAuth';
 import LoginModal from '@/components/modals/LoginModal';
 
 export default function NavigationBar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { showLogin, setShowLogin, checkAuth } = useRequireAuth();
+
+  const getNavClass = (path: string) => {
+    const isActive = path === '/'
+      ? pathname === '/' || pathname.startsWith('/book-detail') || pathname.startsWith('/search')
+      : pathname.startsWith(path);
+    return `flex items-center justify-center p-2 md:p-3 transition-colors ${
+      isActive ? 'text-brown-accent' : 'text-gray-medium hover:text-brown-accent'
+    }`;
+  };
 
   // 게시글 작성 클릭
   const goToCreatePost = () => {
@@ -39,7 +49,7 @@ export default function NavigationBar() {
         {/* 홈 버튼 */}
         <Link
           href="/"
-          className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
+          className={getNavClass('/')}
           aria-label="홈"
         >
           <House size={24} className="md:w-7 md:h-7" />
@@ -48,7 +58,7 @@ export default function NavigationBar() {
         {/* 모임 버튼 */}
         <Link
           href="/meetup"
-          className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
+          className={getNavClass('/meetup')}
           aria-label="모임"
         >
           <Users size={24} className="md:w-7 md:h-7" />
@@ -57,7 +67,7 @@ export default function NavigationBar() {
         {/* 게시글 작성 버튼 */}
         <button
             onClick={goToCreatePost}
-            className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
+            className={getNavClass('/book-registration')}
             aria-label="게시글 작성"
           >
             <FilePlus size={24} className="md:w-7 md:h-7" />
@@ -66,7 +76,7 @@ export default function NavigationBar() {
         {/* 채팅 버튼 */}
         <button
             onClick={goToChat}
-            className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
+            className={getNavClass('/chat')}
             aria-label="채팅"
           >
             <MessageSquareMore size={24} className="md:w-7 md:h-7" />
@@ -75,7 +85,7 @@ export default function NavigationBar() {
         {/* 마이페이지 버튼 */}
         <button
             onClick={goToMyPage}
-            className="flex items-center justify-center p-2 md:p-3 text-gray-medium hover:text-brown-accent active:text-brown-accent transition-colors"
+            className={getNavClass('/user')}
             aria-label="마이페이지"
           >
             <User size={24} className="md:w-7 md:h-7" />

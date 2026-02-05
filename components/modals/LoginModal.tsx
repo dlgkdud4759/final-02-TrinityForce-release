@@ -15,7 +15,7 @@ import { useUserStore } from '@/zustand/useUserStore';
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess?: () => void
+  onLoginSuccess?: () => void;
 };
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps) {
@@ -45,30 +45,41 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
       console.log('로그인 응답:', response.data);
 
-      //성공
+      // 성공
       if (response.data.ok) {
-        const userData: UserDetail = response.data.item;
+        const accessToken =
+          response.data.accessToken ?? response.data.item?.token?.accessToken;
+        const refreshToken =
+          response.data.refreshToken ?? response.data.item?.token?.refreshToken;
+
+        const userData: UserDetail = {
+          ...response.data.item,
+          token: {
+            accessToken,
+            refreshToken,
+          },
+        };
 
         setUser(userData, keepLoggedIn);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('user:changed'));
+        }
 
         alert('로그인 성공!');
         onClose();
-
         if (onLoginSuccess) {
-          onLoginSuccess()
+          onLoginSuccess();
         }
-
       } else {
         alert('로그인에 실패했습니다.');
       }
-      }  catch (error) {
-        console.error('로그인 에러', error);
-        handleAxiosError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+    } catch (error) {
+      console.error('로그인 에러', error);
+      handleAxiosError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSignup = () => {
     onClose();

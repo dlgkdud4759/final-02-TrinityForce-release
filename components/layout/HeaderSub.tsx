@@ -1,24 +1,29 @@
-'use client'
+'use client';
+
 import Link from 'next/link';
-import { MapPin, Bell, ChevronLeft} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { MapPin, Bell, ChevronLeft } from 'lucide-react';
 
 interface HeaderSubProps {
   title?: string;
+  backHref?: string;
   backUrl?: string;
 }
 
-export default function HeaderSub({ title = '헤더', backUrl }: HeaderSubProps) {
+export default function HeaderSub({ title = '헤더', backHref, backUrl }: HeaderSubProps) {
+  const router = useRouter();
+  const resolvedBackHref = backHref ?? backUrl;
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-15 px-4 bg-bg-primary">
-      {backUrl ? (
-        // backUrl이 있으면 그 URL로
-        <Link href={backUrl}>
-          <ChevronLeft size={32}/>
+      {/* 왼쪽 뒤로가기 */}
+      {resolvedBackHref ? (
+        <Link href={resolvedBackHref}>
+          <ChevronLeft size={32} />
         </Link>
       ) : (
-        // 없으면 기본 동작 (뒤로가기)
-        <button onClick={() => window.history.back()}>
-          <ChevronLeft size={32}/>
+        <button type="button" onClick={() => router.back()} aria-label="뒤로가기">
+          <ChevronLeft size={32} />
         </button>
       )}
 
@@ -31,14 +36,14 @@ export default function HeaderSub({ title = '헤더', backUrl }: HeaderSubProps)
       <div className="flex items-center gap-3">
         
         {/* 위치 재설정 버튼 */}
-        <button type="button" aria-label="위치 설정">
+        <Link href="/location" aria-label="위치 설정">
           <MapPin size={24} className="text-font-dark" />
-        </button>
+        </Link>
 
         {/* 알림 버튼 */}
-        <button type="button" aria-label="알림" className="relative">
+        <Link href="/alert" aria-label="알림" className="relative">
           <Bell size={24} className="text-font-dark" />
-        </button>
+        </Link>
       </div>
     </header>
   );

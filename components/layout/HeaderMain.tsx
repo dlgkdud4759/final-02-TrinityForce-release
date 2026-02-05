@@ -24,9 +24,9 @@ export default function HeaderMain() {
         </Link>
 
         {/* 알림 버튼 */}
-        <button type="button" aria-label="알림" className="relative cursor-pointer">
+        <Link href="/alert" aria-label="알림" className="relative cursor-pointer">
           <Bell size={24} className="text-font-dark" />
-        </button>
+        </Link>
       </div>
     </header>
   );

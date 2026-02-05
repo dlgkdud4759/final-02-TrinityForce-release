@@ -12,31 +12,37 @@ type UserStore = {
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
   isLoggedIn: false,
-  
+
   // 로그인
   setUser: (user, keepLogin) => {
-    if (keepLogin) {
-      localStorage.setItem('user', JSON.stringify(user));  // 영구 저장
-    } else {
-      sessionStorage.setItem('user', JSON.stringify(user));  // 임시 저장
+    if (typeof window !== 'undefined') {
+      if (keepLogin) {
+        localStorage.setItem('user', JSON.stringify(user)); // 영구 저장
+      } else {
+        sessionStorage.setItem('user', JSON.stringify(user)); // 임시 저장
+      }
     }
     set({ user, isLoggedIn: true });
   },
-  
+
   // 로그아웃
   logout: () => {
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('user');
-    localStorage.removeItem('recentSearches');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+      localStorage.removeItem('recentSearches');
+    }
     set({ user: null, isLoggedIn: false });
   },
-  
+
   // 저장된 로그인 확인
   initUser: () => {
+    if (typeof window === 'undefined') return;
+
     const localUser = localStorage.getItem('user');
     const sessionUser = sessionStorage.getItem('user');
     const userData = localUser || sessionUser;
-    
+
     if (userData) {
       set({ user: JSON.parse(userData), isLoggedIn: true });
     }

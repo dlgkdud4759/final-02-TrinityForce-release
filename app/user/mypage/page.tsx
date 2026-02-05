@@ -1,6 +1,10 @@
 // app/user/mypage/page.tsx
+'use client'
+
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useUserStore } from "@/zustand/useUserStore"
 import { AlertIcon } from "@/app/components/icons/Alert"
 import { BlockIcon } from "@/app/components/icons/Block"
 import { EditIcon } from "@/app/components/icons/Edit"
@@ -13,6 +17,15 @@ import { ReviewsIcon } from "@/app/components/icons/Reviews"
 import { WithdrawalIcon } from "@/app/components/icons/Withdrawal"
 
 export default function MyPage() {
+  const router = useRouter();
+  const logout = useUserStore((state) => state.logout);
+
+  const handleLogout = () => {
+    logout();
+    window.dispatchEvent(new Event('user:changed'));
+    router.push('/');
+  };
+
   return (
     <div className="min-h-screen w-full bg-bg-primary">
       <div className="px-4 py-6 max-w-md mx-auto">
@@ -118,7 +131,7 @@ export default function MyPage() {
         {/* 로그아웃/탈퇴 목록 */}
         <div className="bg-white rounded-2xl overflow-hidden">
           {/* 로그아웃 */}
-          <button className="w-full flex items-center px-4 py-3 border-b border-border-primary hover:bg-gray-light transition text-left">
+          <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 border-b border-border-primary hover:bg-gray-light transition text-left">
             <LogOutIcon className="w-5 h-5 mr-3" />
             <span className="text-font-dark">로그아웃</span>
           </button>

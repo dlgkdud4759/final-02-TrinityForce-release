@@ -28,18 +28,40 @@ export default function NavigationBar() {
         </Link>
 
         {/* 모임 버튼 */}
-        <Link href="/meetup" className={getLinkClassName('/meetup')} aria-label="모임">
-          <Users size={24} className="md:w-7 md:h-7" />
-        </Link>
+        {isLoggedIn ? (
+          <Link href="/meetup" className={getLinkClassName('/meetup')} aria-label="모임">
+            <Users size={24} className="md:w-7 md:h-7" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsLoginModalOpen(true)}
+            className={getLinkClassName('/meetup')}
+            aria-label="모임"
+          >
+            <Users size={24} className="md:w-7 md:h-7" />
+          </button>
+        )}
 
         {/* 게시글 작성 버튼 */}
-        <Link
-          href={isLoggedIn ? '/book-registration' : '/user/login'}
-          className={getLinkClassName('/book-registration')}
-          aria-label="게시글 작성"
-        >
-          <FilePlus size={24} className="md:w-7 md:h-7" />
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/book-registration"
+            className={getLinkClassName('/book-registration')}
+            aria-label="게시글 작성"
+          >
+            <FilePlus size={24} className="md:w-7 md:h-7" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsLoginModalOpen(true)}
+            className={getLinkClassName('/book-registration')}
+            aria-label="게시글 작성"
+          >
+            <FilePlus size={24} className="md:w-7 md:h-7" />
+          </button>
+        )}
 
         {/* 채팅 버튼 */}
         {isLoggedIn ? (
@@ -58,13 +80,24 @@ export default function NavigationBar() {
         )}
 
         {/* 마이페이지 버튼 */}
-        <Link
-          href={isLoggedIn ? '/user/mypage' : '/user/login'}
-          className={getLinkClassName('/user/mypage')}
-          aria-label="마이페이지"
-        >
-          <User size={24} className="md:w-7 md:h-7" />
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/user/mypage"
+            className={getLinkClassName('/user/mypage')}
+            aria-label="마이페이지"
+          >
+            <User size={24} className="md:w-7 md:h-7" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsLoginModalOpen(true)}
+            className={getLinkClassName('/user/mypage')}
+            aria-label="마이페이지"
+          >
+            <User size={24} className="md:w-7 md:h-7" />
+          </button>
+        )}
       </div>
 
       <LoginModal

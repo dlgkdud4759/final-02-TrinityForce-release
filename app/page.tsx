@@ -6,6 +6,7 @@ import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SearchInput from '@/components/common/SearchInput';
+import { useLikeStore } from '@/zustand/useLikeStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -33,6 +34,7 @@ interface Product {
 
 export default function Home() {
   const router = useRouter();
+  const { likedPosts, toggleLike } = useLikeStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,11 +136,22 @@ export default function Home() {
                   />
                   <button
                     type="button"
-                    className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform cursor-pointer group"
                     aria-label="좋아요"
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleLike(product._id);
+                    }}
                   >
-                    <Heart size={18} className="md:w-5 md:h-5 text-font-dark" />
+                    <Heart
+                      size={18}
+                      className={`md:w-5 md:h-5 transition-colors ${
+                        likedPosts.has(product._id)
+                          ? 'text-red-like fill-red-like'
+                          : 'text-font-dark group-hover:text-red-like group-hover:fill-red-like'
+                      }`}
+                    />
                   </button>
                 </div>
 

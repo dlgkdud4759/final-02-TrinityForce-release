@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import SearchInput from '@/components/common/SearchInput';
 import LoginModal from '@/components/modals/LoginModal';
 import useAuthStatus from '@/utils/useAuthStatus';
+import { useLikeStore } from '@/zustand/useLikeStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -41,6 +42,7 @@ export default function Meetup() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [posts, setPosts] = useState<MeetupPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { likedPosts, toggleLike } = useLikeStore();
   const isLoggedIn = useAuthStatus();
   const router = useRouter();
 
@@ -78,6 +80,12 @@ export default function Meetup() {
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setHasSearched(true);
+  };
+
+  const handleToggleLike = (e: React.MouseEvent, postId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleLike(postId);
   };
 
   const handleRequireLogin = (e: React.MouseEvent, target: string) => {
@@ -183,10 +191,24 @@ export default function Meetup() {
                       {post.content}
                     </p>
                     <div className="flex items-center gap-1 md:gap-2 mt-auto">
-                      <span className="flex items-center gap-1">
-                        <Heart size={16} className="md:w-5 md:h-5 text-gray-medium" />
+                      <button
+                        type="button"
+                        aria-label="좋아요"
+                        onClick={(e) => handleToggleLike(e, post._id)}
+                        className="flex items-center gap-1 cursor-pointer group"
+                      >
+                        <Heart
+                          size={16}
+                          className={`md:w-5 md:h-5 transition-colors ${
+                            likedPosts.has(post._id)
+                              ? 'text-red-like fill-red-like'
+                              : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
+                          }`}
+                        />
+                      </button>
+                      <span className="text-sm md:text-base text-gray-medium">
+                        {likedPosts.has(post._id) ? post.likes + 1 : post.likes}
                       </span>
-                      <span className="text-sm md:text-base text-gray-medium">{post.likes}</span>
                     </div>
                   </div>
                 </Link>

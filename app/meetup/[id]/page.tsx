@@ -8,6 +8,7 @@ import HeaderSub from '@/components/layout/HeaderSub';
 import Button from '@/components/ui/Button';
 import LoginModal from '@/components/modals/LoginModal';
 import useAuthStatus from '@/utils/useAuthStatus';
+import { useLikeStore } from '@/zustand/useLikeStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -69,6 +70,7 @@ export default function MeetupPostDetail() {
   const params = useParams<{ id: string }>();
   const postId = params?.id;
   const isLoggedIn = useAuthStatus();
+  const { likedPosts, toggleLike } = useLikeStore();
 
   const [post, setPost] = useState<MeetupPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,12 +154,14 @@ export default function MeetupPostDetail() {
   const shouldShowError = !post && error;
 
   const imageUrl = getImageUrl(displayPost.image);
-  const likeCount = displayPost.likes ?? displayPost.bookmarks ?? 0;
+  const baseLikeCount = displayPost.likes ?? displayPost.bookmarks ?? 0;
+  const isLiked = likedPosts.has(displayPost._id);
+  const likeCount = isLiked ? baseLikeCount + 1 : baseLikeCount;
 
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
       {/* 헤더 */}
-      <HeaderSub title="독서 모임" backHref="/meetup" />
+      <HeaderSub title="독서 모임" backUrl="/meetup" />
 
       {/* 게시글 헤더 */}
       <div className="px-4 py-4 md:px-6 md:py-6 max-w-6xl mx-auto">
@@ -165,7 +169,21 @@ export default function MeetupPostDetail() {
           <h2 className="text-xl md:text-2xl font-bold text-font-dark">{displayPost.title}</h2>
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-1 md:gap-2">
-              <Heart size={20} className="md:w-6 md:h-6 text-gray-dark" />
+              <button
+                type="button"
+                aria-label="좋아요"
+                onClick={() => toggleLike(displayPost._id)}
+                className="flex items-center gap-1 cursor-pointer group"
+              >
+                <Heart
+                  size={20}
+                  className={`md:w-6 md:h-6 transition-colors ${
+                    isLiked
+                      ? 'text-red-like fill-red-like'
+                      : 'text-gray-dark group-hover:text-red-like group-hover:fill-red-like'
+                  }`}
+                />
+              </button>
               <span className="text-sm md:text-base text-gray-dark">{likeCount}</span>
             </div>
             <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">

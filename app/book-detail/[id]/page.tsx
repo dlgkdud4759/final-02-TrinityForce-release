@@ -8,6 +8,7 @@ import { Heart, Star, X } from 'lucide-react';
 import HeaderSub from '@/components/layout/HeaderSub';
 import LoginModal from '@/components/modals/LoginModal';
 import { useUserStore } from '@/zustand/useUserStore';
+import { useLikeStore } from '@/zustand/useLikeStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -43,10 +44,10 @@ export default function BookDetailPage() {
   const titleCls = 'text-[22px] font-medium text-font-dark';
   const dividerCls = 'border-t border-gray-lighter';
 
+  const { likedPosts, toggleLike } = useLikeStore();
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [liked, setLiked] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
@@ -137,19 +138,20 @@ export default function BookDetailPage() {
               <button
                 type="button"
                 aria-label="좋아요"
-                onClick={() => setLiked((v) => !v)}
-                className="flex items-center"
+                onClick={() => toggleLike(product._id)}
+                className="flex items-center cursor-pointer group"
               >
                 <Heart
                   size={22}
-                  className={[
-                    'transition-colors',
-                    liked ? 'text-red-like fill-red-like' : 'text-gray-medium',
-                  ].join(' ')}
+                  className={`transition-colors ${
+                    likedPosts.has(product._id)
+                      ? 'text-red-like fill-red-like'
+                      : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
+                  }`}
                 />
               </button>
               <span className="text-[16px] font-medium text-gray-medium">
-                {liked ? (product.bookmarks || 0) + 1 : (product.bookmarks || 0)}
+                {likedPosts.has(product._id) ? (product.bookmarks || 0) + 1 : (product.bookmarks || 0)}
               </span>
             </div>
             <p className="mt-1 text-[14px] font-medium text-gray-dark">

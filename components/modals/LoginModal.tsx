@@ -15,9 +15,10 @@ import { useUserStore } from '@/zustand/useUserStore';
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onLoginSuccess?: () => void;
 };
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,6 +67,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
         alert('로그인 성공!');
         onClose();
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
       } else {
         alert('로그인에 실패했습니다.');
       }

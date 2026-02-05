@@ -27,6 +27,7 @@ export const useUserStore = create<UserStore>((set) => ({
   logout: () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('recentSearches');
     set({ user: null, isLoggedIn: false });
   },
   

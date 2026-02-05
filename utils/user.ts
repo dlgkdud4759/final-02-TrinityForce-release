@@ -8,7 +8,7 @@ import type { UserDetail } from '../types/user';
  * @returns {UserDetail | null} - 사용자 객체 또는 null
  */
 export function getUser(): UserDetail | null {
-  const user = localStorage.getItem('user');
+  const user = localStorage.getItem('user') || sessionStorage.getItem('user');
   return user ? JSON.parse(user) : null;
 }
 
@@ -20,7 +20,11 @@ export function getUser(): UserDetail | null {
  * @returns {void}
  */
 export function setUser(user: UserDetail): void {
-  localStorage.setItem('user', JSON.stringify(user));
+  if (localStorage.getItem('user')) {
+    localStorage.setItem('user', JSON.stringify(user));
+  } else if (sessionStorage.getItem('user')) {
+    sessionStorage.setItem('user', JSON.stringify(user));
+  }
 }
 
 /**
@@ -31,6 +35,7 @@ export function setUser(user: UserDetail): void {
  */
 export function removeUser(): void {
   localStorage.removeItem('user');
+  sessionStorage.removeItem('user');
 }
 
 /**

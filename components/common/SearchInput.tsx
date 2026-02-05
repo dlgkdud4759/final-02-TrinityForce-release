@@ -29,6 +29,14 @@ export default function SearchInput({
       onSearch(value, selectedCategory)
     }
   }
+    
+  // enter
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
 
   return (
     <div className="relative w-full max-w-[680px] h-[40px] flex items-center bg-white rounded-[30px] border border-brown-accent">
@@ -52,6 +60,7 @@ export default function SearchInput({
         onChange={onChange}
         onFocus={onFocus}
         onBlur={onBlur}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="flex-1 px-3 text-sm text-font-dark placeholder:text-gray-dark bg-transparent outline-none"
       />

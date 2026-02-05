@@ -30,6 +30,7 @@ export const useUserStore = create<UserStore>((set) => ({
     if (typeof window !== 'undefined') {
       localStorage.removeItem('user');
       sessionStorage.removeItem('user');
+      localStorage.removeItem('recentSearches');
     }
     set({ user: null, isLoggedIn: false });
   },

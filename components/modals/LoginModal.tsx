@@ -8,6 +8,9 @@ import PasswordInput from '@/components/common/PasswordInput';
 import { RoundCheckboxIcon } from '@/app/components/icons/RoundCheckbox';
 import { KakaoIcon } from '@/app/components/icons/Kakao';
 import { GoogleIcon } from '@/app/components/icons/Google';
+import { getAxios, handleAxiosError } from '@/utils/axios';
+import type { UserDetail } from '@/types/user';
+import { useUserStore } from '@/zustand/useUserStore';
 
 type LoginModalProps = {
   isOpen: boolean;
@@ -19,10 +22,59 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const setUser = useUserStore((state) => state.setUser);
 
-  const handleLogin = () => {
-    console.log('로그인 클릭:', { email, password, keepLoggedIn });
+  // api 연동
+  const handleLogin = async () => {
+    // 유효성 검사
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
 
+    try {
+      setIsLoading(true);
+
+      const axios = getAxios();
+      const response = await axios.post('users/login', {
+        email,
+        password,
+      });
+
+      console.log('로그인 응답:', response.data);
+
+      // 성공
+      if (response.data.ok) {
+        const accessToken =
+          response.data.accessToken ?? response.data.item?.token?.accessToken;
+        const refreshToken =
+          response.data.refreshToken ?? response.data.item?.token?.refreshToken;
+
+        const userData: UserDetail = {
+          ...response.data.item,
+          token: {
+            accessToken,
+            refreshToken,
+          },
+        };
+
+        setUser(userData, keepLoggedIn);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('user:changed'));
+        }
+
+        alert('로그인 성공!');
+        onClose();
+      } else {
+        alert('로그인에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('로그인 에러', error);
+      handleAxiosError(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignup = () => {
@@ -75,9 +127,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         {/* 로그인 버튼 */}
         <button
           onClick={handleLogin}
+          disabled={isLoading}
           className="w-[353px] py-3 bg-brown-accent text-white rounded-lg font-medium mb-4"
         >
-          로그인
+          {isLoading ? '로그인 중...' : '로그인'}
         </button>
 
         {/* 또는 */}

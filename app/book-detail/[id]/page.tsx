@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Heart, Star, X } from 'lucide-react';
 
 import HeaderSub from '@/components/layout/HeaderSub';
+import { useUserStore } from '@/zustand/useUserStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -46,6 +47,16 @@ export default function BookDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+
+  const handleChatClick = () => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    router.push(`/chat`);
+  };
 
   // 데이터 불러오기
   useEffect(() => {
@@ -286,6 +297,7 @@ export default function BookDetailPage() {
               <div className="mt-3 flex justify-end">
                 <button
                   type="button"
+                  onClick={handleChatClick}
                   className="px-4 py-2 rounded-lg bg-brown-guide text-font-white text-[14px] font-medium hover:opacity-90 transition-opacity"
                 >
                   채팅하기

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import SearchInput from '@/components/common/SearchInput';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -31,10 +32,10 @@ interface Product {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchCategory, setSearchCategory] = useState('전체');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -72,28 +73,13 @@ export default function Home() {
   };
 
   const handleSearch = (value: string, category: string) => {
-    setSearchQuery(value);
-    setSearchCategory(category);
+    if (!value.trim()) return;
+    const params = new URLSearchParams({ keyword: value.trim() });
+    if (category !== '전체') {
+      params.set('category', category);
+    }
+    router.push(`/search?${params.toString()}`);
   };
-
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      searchCategory === '전체' || product.extra?.category === searchCategory;
-
-    if (!normalizedQuery) return matchesCategory;
-
-    const name = product.name?.toLowerCase() || '';
-    const content = product.content?.toLowerCase() || '';
-    const author = product.extra?.author?.toLowerCase() || '';
-
-    const matchesQuery =
-      name.includes(normalizedQuery) ||
-      content.includes(normalizedQuery) ||
-      author.includes(normalizedQuery);
-
-    return matchesCategory && matchesQuery;
-  });
 
   if (loading) {
     return (
@@ -117,7 +103,7 @@ export default function Home() {
 
       {/* 도서 목록 */}
       <main className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-24">
-        {filteredProducts.length === 0 ? (
+        {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <p className="text-font-dark text-lg">
               {products.length === 0 ? '등록된 도서가 없습니다.' : '검색 결과가 없습니다.'}
@@ -131,7 +117,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((product) => (
+            {products.map((product) => (
               <Link
                 key={product._id}
                 href={`/book-detail/${product._id}`}

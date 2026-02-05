@@ -112,18 +112,9 @@ export default function MyPage() {
 
   // 회원 탈퇴 처리
   const handleWithdrawal = async () => {
-    try {
-      const axios = getAxios();
-      await axios.delete(`/users/${user?._id}`);
-      
-      logout();
-      alert('회원 탈퇴가 완료되었습니다.');
-      router.push('/');
-    } catch (error) {
-      console.error('탈퇴 에러:', error);
-      alert('회원 탈퇴에 실패했습니다.');
-    }
-  };
+  alert('회원 탈퇴 기능은 준비 중입니다.');
+  setShowWithdrawalModal(false);
+};
   
   return (
     <div className="min-h-screen w-full bg-bg-primary">
@@ -133,7 +124,7 @@ export default function MyPage() {
         <div className="bg-white rounded-2xl p-6 mb-4 flex flex-col items-center">
           {/* 프로필 이미지 */}
           <div className="relative mb-3">
-            <div className="w-20 h-20 bg-bg-primary rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 bg-brown-accent rounded-full flex items-center justify-center overflow-hidden">
               {user?.image ? (
                 <Image 
                   src={user.image} 
@@ -144,7 +135,7 @@ export default function MyPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl font-bold text-font-dark">
+                <span className="text-2xl font-bold text-white">
                   {user?.name?.[0] || '?'}
                 </span>
               )}
@@ -171,7 +162,7 @@ export default function MyPage() {
                 {user?.image && (
                   <button
                     onClick={handleDeleteImage}
-                    className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-gray-light"
+                    className="w-full px-4 py-2 text-left text-sm text-red-like hover:bg-gray-light"
                   >
                     사진 삭제
                   </button>

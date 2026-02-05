@@ -3,13 +3,14 @@ import { MapPin, Bell, ChevronLeft} from 'lucide-react';
 
 interface HeaderSubProps {
   title?: string;
+  backHref?: string;
 }
 
-export default function HeaderSub({ title = '헤더' }: HeaderSubProps) {
+export default function HeaderSub({ title = '헤더', backHref = '/' }: HeaderSubProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-15 px-4 bg-bg-primary">
       {/* 왼쪽 뒤로가기 */}
-      <Link href="/" >
+      <Link href={backHref} >
         <ChevronLeft size={32}/>
       </Link>
 

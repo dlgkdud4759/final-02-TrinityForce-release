@@ -14,7 +14,7 @@ export default function ReviewWritePage() {
   // URL에서 orderId, productId 받아오기
   const orderId = searchParams.get('orderId');
   const productId = searchParams.get('productId');
-
+  
   const [rating, setRating] = useState(0);
   const [selectedOption, setSelectedOption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +64,7 @@ export default function ReviewWritePage() {
       return;
     }
 
-        try {
+    try {
       setIsLoading(true);
 
       const axios = getAxios();
@@ -73,6 +73,7 @@ export default function ReviewWritePage() {
         order_id: Number(orderId),
         product_id: Number(productId),
         rating: rating,
+        content: selectedOption,
         extra: {
           title: selectedOption,
         },
@@ -99,7 +100,7 @@ export default function ReviewWritePage() {
     router.back();
   };
 
-        return (
+  return (
     <>
       <HeaderSub title="후기 작성" />
       <div className="min-h-screen w-full bg-bg-primary flex items-center justify-center p-4 pt-[60px]">
@@ -126,7 +127,7 @@ export default function ReviewWritePage() {
             ))}
           </div>
 
-        {/* 선택 항목 */}
+          {/* 선택 항목 */}
           {rating > 0 && (
             <div className="space-y-3">
               {options.map((option, index) => (

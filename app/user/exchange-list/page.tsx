@@ -171,8 +171,8 @@ export default function ExchangeListPage() {
                     )}
                     <p className="text-xs text-gray-dark mb-2">
                       {activeTab === "requested" 
-                        ? `판매자: ${item.products[0].seller?.name || item.user?.name || '알 수 없음'}`
-                        : `신청자: ${item.user?.name || '알 수 없음'}`
+                        ? `교환자: ${item.products[0].seller?.name || item.user?.name || '알 수 없음'}`
+                        : `교환자: ${item.user?.name || '알 수 없음'}`
                       }
                     </p>
                     <p className="text-xs text-gray-dark">

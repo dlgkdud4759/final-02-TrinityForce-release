@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import HeaderSub from '@/components/layout/HeaderSub';
 import Button from '@/components/ui/Button';
 import LoginModal from '@/components/modals/LoginModal';
 import useAuthStatus from '@/utils/useAuthStatus';
+import { useLikeStore } from '@/zustand/useLikeStore';
+import { getAxios, handleAxiosError } from '@/utils/axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -68,7 +70,9 @@ const getImageUrl = (image?: MeetupPost['image']) => {
 export default function MeetupPostDetail() {
   const params = useParams<{ id: string }>();
   const postId = params?.id;
+  const router = useRouter();
   const isLoggedIn = useAuthStatus();
+  const { likedPosts, toggleLike } = useLikeStore();
 
   const [post, setPost] = useState<MeetupPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,8 +140,27 @@ export default function MeetupPostDetail() {
     setCommentText('');
   };
 
-  const handleDeletePost = () => {
-    // TODO: 삭제 API 연동 시 여기에 추가
+  const handleDeletePost = async () => {
+    if (!post || !post._id) return;
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    if (!confirm('게시글을 삭제할까요?')) return;
+
+    try {
+      const axios = getAxios();
+      const response = await axios.delete(`/posts/${post._id}`);
+      if (response.data?.ok) {
+        alert('게시글이 삭제되었습니다.');
+        router.push('/meetup');
+        return;
+      }
+      alert('게시글 삭제에 실패했습니다.');
+    } catch (error) {
+      console.error('게시글 삭제 실패:', error);
+      handleAxiosError(error);
+    }
   };
 
   if (isLoading) {
@@ -152,20 +175,43 @@ export default function MeetupPostDetail() {
   const shouldShowError = !post && error;
 
   const imageUrl = getImageUrl(displayPost.image);
-  const likeCount = displayPost.likes ?? displayPost.bookmarks ?? 0;
+  const baseLikeCount = displayPost.likes ?? displayPost.bookmarks ?? 0;
+  const isLiked = likedPosts.has(displayPost._id);
+  const likeCount = isLiked ? baseLikeCount + 1 : baseLikeCount;
 
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
       {/* 헤더 */}
-      <HeaderSub title="독서 모임" backHref="/meetup" />
+      <HeaderSub title="독서 모임" backUrl="/meetup" />
 
       {/* 게시글 헤더 */}
       <div className="px-4 py-4 md:px-6 md:py-6 max-w-6xl mx-auto">
         <div className="flex items-start justify-between">
-          <h2 className="text-xl md:text-2xl font-bold text-font-dark">{displayPost.title}</h2>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl md:text-2xl font-bold text-font-dark">
+              {displayPost.title}
+            </h2>
+            <p className="text-sm md:text-base text-gray-dark">
+              작성자: {displayPost.user?.name || '알 수 없음'}
+            </p>
+          </div>
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-1 md:gap-2">
-              <Heart size={20} className="md:w-6 md:h-6 text-gray-dark" />
+              <button
+                type="button"
+                aria-label="좋아요"
+                onClick={() => toggleLike(displayPost._id)}
+                className="flex items-center gap-1 cursor-pointer group"
+              >
+                <Heart
+                  size={20}
+                  className={`md:w-6 md:h-6 transition-colors ${
+                    isLiked
+                      ? 'text-red-like fill-red-like'
+                      : 'text-gray-dark group-hover:text-red-like group-hover:fill-red-like'
+                  }`}
+                />
+              </button>
               <span className="text-sm md:text-base text-gray-dark">{likeCount}</span>
             </div>
             <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">
@@ -291,11 +337,11 @@ export default function MeetupPostDetail() {
         </div>
 
         {/* 글 삭제 버튼 (내 글일 때만) */}
-        {displayPost.user?._id && displayPost.user._id === currentUserId && (
-          <div className="flex justify-center mt-4 md:mt-6">
-            <Button text="글 삭제" onClick={handleDeletePost} />
-          </div>
-        )}
+      {post && displayPost.user?._id && displayPost.user._id === currentUserId && (
+        <div className="flex justify-center mt-4 md:mt-6">
+          <Button text="글 삭제" onClick={handleDeletePost} />
+        </div>
+      )}
       </div>
 
       <LoginModal

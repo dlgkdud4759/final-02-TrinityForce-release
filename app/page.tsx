@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import SearchInput from '@/components/common/SearchInput';
+import { useLikeStore } from '@/zustand/useLikeStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -30,8 +33,11 @@ interface Product {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const { likedPosts, toggleLike } = useLikeStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,6 +74,15 @@ export default function Home() {
     return `${API_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
   };
 
+  const handleSearch = (value: string, category: string) => {
+    if (!value.trim()) return;
+    const params = new URLSearchParams({ keyword: value.trim() });
+    if (category !== '전체') {
+      params.set('category', category);
+    }
+    router.push(`/search?${params.toString()}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -78,12 +93,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* 검색창 */}
+      <div className="px-4 pt-4 md:px-6 md:pt-6 max-w-6xl mx-auto">
+        <SearchInput
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onSearch={handleSearch}
+          placeholder="도서를 검색하세요."
+        />
+      </div>
 
       {/* 도서 목록 */}
       <main className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-24">
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-font-dark text-lg">등록된 도서가 없습니다.</p>
+            <p className="text-font-dark text-lg">
+              {products.length === 0 ? '등록된 도서가 없습니다.' : '검색 결과가 없습니다.'}
+            </p>
             <Link
               href="/book-registration"
               className="mt-4 px-4 py-2 bg-brown-accent text-font-white rounded-lg"
@@ -110,11 +136,22 @@ export default function Home() {
                   />
                   <button
                     type="button"
-                    className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform cursor-pointer group"
                     aria-label="좋아요"
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleLike(product._id);
+                    }}
                   >
-                    <Heart size={18} className="md:w-5 md:h-5 text-font-dark" />
+                    <Heart
+                      size={18}
+                      className={`md:w-5 md:h-5 transition-colors ${
+                        likedPosts.has(product._id)
+                          ? 'text-red-like fill-red-like'
+                          : 'text-font-dark group-hover:text-red-like group-hover:fill-red-like'
+                      }`}
+                    />
                   </button>
                 </div>
 

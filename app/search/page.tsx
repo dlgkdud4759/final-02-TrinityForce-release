@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import SearchInput from '@/components/common/SearchInput';
 import EmptyState from '@/components/ui/EmptyState';
 import { getAxios, handleAxiosError } from '@/utils/axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import HeaderSub from '@/components/layout/HeaderSub';
 
 type SearchResult = {
@@ -27,6 +27,7 @@ type SearchResult = {
 
 export default function SearchPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -39,8 +40,9 @@ export default function SearchPage() {
     }
     return [];
   });
+
   // 검색 실행
-  const handleSearch = async (keyword: string, category: string) => {
+  const handleSearch = useCallback(async (keyword: string, category: string) => {
     if (!keyword.trim()) {
       alert('검색어를 입력해주세요.')
       return
@@ -68,11 +70,14 @@ export default function SearchPage() {
       setSearchResults(response.data.item || []);
 
       // 최근 검색어
-      if (!recentSearches.includes(keyword)) {
-      const newSearches = [keyword, ...recentSearches.slice(0, 9)];
-      setRecentSearches(newSearches);
-      localStorage.setItem('recentSearches', JSON.stringify(newSearches));
-    }
+      setRecentSearches(prev => {
+        if (!prev.includes(keyword)) {
+          const newSearches = [keyword, ...prev.slice(0, 9)];
+          localStorage.setItem('recentSearches', JSON.stringify(newSearches));
+          return newSearches;
+        }
+        return prev;
+      });
     } catch (error) {
       console.error('검색 에러', error);
       handleAxiosError(error);
@@ -80,7 +85,17 @@ export default function SearchPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
+
+  // URL 파라미터로 전달된 검색어 자동 검색
+  useEffect(() => {
+    const keyword = searchParams.get('keyword');
+    const category = searchParams.get('category') || '전체';
+    if (keyword) {
+      setSearchQuery(keyword);
+      handleSearch(keyword, category);
+    }
+  }, [searchParams, handleSearch]);
 
   // 최근 검색어 삭제
   const handleDeleteRecent = (index: number) => {

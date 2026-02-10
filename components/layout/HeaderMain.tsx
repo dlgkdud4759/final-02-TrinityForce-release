@@ -1,33 +1,61 @@
+'use client'
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MapPin, Bell } from 'lucide-react';
+import { useRequireAuth } from '@/app/hooks/useRequireAuth';
+import LoginModal from '@/components/modals/LoginModal';
+import { useLocationStore } from '@/zustand/useLocationStore';
 
 export default function HeaderMain() {
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-15 pr-4 bg-bg-primary">
-      {/* 로고 */}
-      <Link href="/">
-        <Image
-          src="/images/Logo.png"
-          alt="동네책장 로고"
-          width={70}
-          height={1}
-          priority
-        />
-      </Link>
+  const router = useRouter();
+  const { showLogin, setShowLogin, checkAuth } = useRequireAuth();
+  const address = useLocationStore((state) => state.address);
 
-      {/* 오른쪽 아이콘 영역 */}
-      <div className="flex items-center gap-3">
-        {/* 위치 재설정 버튼 */}
-        <Link href="/location" aria-label="위치 설정" className="cursor-pointer">
-          <MapPin size={24} className="text-font-dark" />
+  const goToAlert = () => {
+    checkAuth(() => {
+      router.push('/alert');
+    });
+  };
+
+  return (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-15 pr-4 bg-bg-primary">
+        {/* 로고 */}
+        <Link href="/">
+          <Image
+            src="/images/Logo.png"
+            alt="동네책장 로고"
+            width={70}
+            height={1}
+            priority
+          />
         </Link>
 
-        {/* 알림 버튼 */}
-        <button type="button" aria-label="알림" className="relative cursor-pointer">
-          <Bell size={24} className="text-font-dark" />
-        </button>
-      </div>
-    </header>
+        {/* 오른쪽 아이콘 영역 */}
+        <div className="flex items-center gap-3">
+          {/* 위치 재설정 버튼 */}
+          <Link href="/location" aria-label="위치 설정" className="flex items-center gap-1 cursor-pointer">
+            <MapPin size={24} className="text-font-dark" />
+            {address && (
+              <span className="text-sm text-font-dark font-medium max-w-20 truncate">
+                {address}
+              </span>
+            )}
+          </Link>
+
+          {/* 알림 버튼 */}
+          <button type="button" onClick={goToAlert} aria-label="알림" className="relative cursor-pointer">
+            <Bell size={24} className="text-font-dark" />
+          </button>
+        </div>
+      </header>
+
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+      />
+    </>
   );
 }

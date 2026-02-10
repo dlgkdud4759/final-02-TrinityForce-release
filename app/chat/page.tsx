@@ -1,25 +1,13 @@
 import HeaderSub from '@/components/layout/HeaderSub';
 import NavigationBar from '@/components/layout/Navigation';
-import ChatItem from '@/components/ui/ChatItem';
+import ChatList from './ChatList';
 
 export default function ChatPage() {
   return (
     <>
       <HeaderSub />
 
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
-      <ChatItem />
+      <ChatList />
 
       <NavigationBar />
     </>

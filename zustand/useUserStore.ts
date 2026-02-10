@@ -7,12 +7,16 @@ type UserStore = {
   setUser: (user: UserDetail, keepLogin: boolean) => void;
   logout: () => void;
   initUser: () => void;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
 };
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
   isLoggedIn: false,
-  
+  _hasHydrated: false,
+  setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
+
   // 로그인
   setUser: (user, keepLogin) => {
     if (keepLogin) {
@@ -27,6 +31,7 @@ export const useUserStore = create<UserStore>((set) => ({
   logout: () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('recentSearches');
     set({ user: null, isLoggedIn: false });
   },
   

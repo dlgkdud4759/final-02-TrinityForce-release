@@ -1,39 +1,150 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Heart, Star, X } from 'lucide-react';
 
 import HeaderSub from '@/components/layout/HeaderSub';
+import LoginModal from '@/components/modals/LoginModal';
+import { useUserStore } from '@/zustand/useUserStore';
+import { useLikeStore } from '@/zustand/useLikeStore';
 
-export default function DetailPage() {
+import { saveRecentView } from '@/utils/recentViews'
+import { getUser } from '@/utils/user'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
+
+interface ProductData {
+  _id: number;
+  seller_id: number;
+  name: string;
+  content: string;
+  mainImages?: { path: string; name: string }[];
+  createdAt: string;
+  updatedAt: string;
+  seller?: {
+    _id: number;
+    name: string;
+    image?: string;
+  };
+  bookmarks?: number;
+  extra?: {
+    isBook?: boolean;
+    author?: string;
+    condition?: '최상' | '상' | '중';
+    category?: string;
+  };
+}
+
+export default function BookDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params.id as string;
+
   // 공통 스타일
   const titleCls = 'text-[22px] font-medium text-font-dark';
   const dividerCls = 'border-t border-gray-lighter';
 
-  // 더미 데이터
-  const post = {
-    likes: 24,
-    createdAt: '2025.01.28 14:30',
+  const { likedPosts, toggleLike } = useLikeStore();
+  const [product, setProduct] = useState<ProductData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+
+  const handleChatClick = () => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    router.push(`/chat`);
   };
 
-  const [liked, setLiked] = useState(false);
+  // 데이터 불러오기
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/products/${id}`, {
+          headers: {
+            'client-id': CLIENT_ID || '',
+          },
+        });
+        const data = await res.json();
 
-  const images = [
-    '/images/book1.jpg',
-    '/images/book2.jpg',
-    '/images/book3.jpg',
-  ];
+        if (!res.ok) {
+          throw new Error(data.message || '도서 정보를 불러오는데 실패했습니다.');
+        }
 
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
+        setProduct(data.item);
 
-  // 상태 버튼
-  const condition: '최상' | '상' | '중' = '최상';
+        if (data.item) {
+          const currentUser = getUser()
+          saveRecentView(data.item, currentUser?._id)
+        }
+      } catch (err) {
+        console.error('도서 조회 실패:', err);
+        setError('도서 정보를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const likeCount = useMemo(() => {
-    // 단순 토글 시 숫자도 바뀌는 느낌만
-    return liked ? post.likes + 1 : post.likes;
-  }, [liked, post.likes]);
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  // 이미지 URL 처리
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return '/images/book1.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `${API_URL}/${imagePath}`;
+  };
+
+  // 날짜 포맷팅
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    const dateStr = date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const timeStr = date.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    return `${dateStr} ${timeStr}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <p className="text-font-dark">로딩 중...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center gap-4">
+        <p className="text-font-dark">{error || '게시글을 찾을 수 없습니다.'}</p>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="px-4 py-2 rounded-lg bg-brown-accent text-font-white"
+        >
+          돌아가기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
@@ -48,23 +159,24 @@ export default function DetailPage() {
               <button
                 type="button"
                 aria-label="좋아요"
-                onClick={() => setLiked((v) => !v)}
-                className="flex items-center"
+                onClick={() => toggleLike(product._id)}
+                className="flex items-center cursor-pointer group"
               >
                 <Heart
                   size={22}
-                  className={[
-                    'transition-colors',
-                    liked ? 'text-red-like' : 'text-gray-medium',
-                  ].join(' ')}
+                  className={`transition-colors ${
+                    likedPosts.has(product._id)
+                      ? 'text-red-like fill-red-like'
+                      : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
+                  }`}
                 />
               </button>
               <span className="text-[16px] font-medium text-gray-medium">
-                {likeCount}
+                {likedPosts.has(product._id) ? (product.bookmarks || 0) + 1 : (product.bookmarks || 0)}
               </span>
             </div>
-            <p className="mt-1 text-[14px] font-medium text-gray-dark">
-              {post.createdAt}
+            <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">
+              {formatDate(product.createdAt)}
             </p>
           </div>
         </div>
@@ -74,42 +186,62 @@ export default function DetailPage() {
       <div className="px-4 pb-4 max-w-6xl mx-auto">
         <h3 className={titleCls}>도서명</h3>
         <div className="mt-3">
-          <input
-            placeholder="도서명을 입력해주세요."
-            className="w-full rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark placeholder:text-gray-medium focus:outline-none focus:border-brown-accent"
-          />
+          <p className="w-full rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark">
+            {product.name}
+          </p>
         </div>
       </div>
 
       <div className={dividerCls} />
+
+      {/* 저자 */}
+      {product.extra?.author && (
+        <>
+          <div className="px-4 py-4 max-w-6xl mx-auto">
+            <h3 className={titleCls}>저자</h3>
+            <div className="mt-3">
+              <p className="w-full rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark">
+                {product.extra.author}
+              </p>
+            </div>
+          </div>
+
+          <div className={dividerCls} />
+        </>
+      )}
 
       {/* 도서 사진 */}
-      <div className="px-4 py-4 max-w-6xl mx-auto">
-        <h3 className={titleCls}>도서 사진</h3>
+      {product.mainImages && product.mainImages.length > 0 && (
+        <>
+          <div className="px-4 py-4 max-w-6xl mx-auto">
+            <h3 className={titleCls}>도서 사진</h3>
 
-        {/* 가로 슬라이드 */}
-        <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
-          {images.map((src, idx) => (
-            <div
-              key={`${src}-${idx}`}
-              className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter"
-            >
-              <Image src={src} alt={`도서 사진 ${idx + 1}`} fill className="object-cover" />
+            {/* 가로 슬라이드 */}
+            <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
+              {product.mainImages.map((img, idx) => (
+                <div key={idx} className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter">
+                  <Image
+                    src={getImageUrl(img.path)}
+                    alt={`${product.name} ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div className={dividerCls} />
+          <div className={dividerCls} />
+        </>
+      )}
 
       {/* 설명 */}
       <div className="px-4 py-4 max-w-6xl mx-auto">
         <h3 className={titleCls}>설명</h3>
         <div className="mt-3">
-          <textarea
-            placeholder="책에 대한 설명을 입력해주세요."
-            className="w-full min-h-45 rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark placeholder:text-gray-medium resize-none focus:outline-none focus:border-brown-accent"
-          />
+          <p className="w-full min-h-[120px] rounded-lg border border-gray-lighter bg-transparent px-4 py-3 text-[16px] text-font-dark whitespace-pre-wrap">
+            {product.content}
+          </p>
         </div>
       </div>
 
@@ -130,27 +262,19 @@ export default function DetailPage() {
 
         {/* 상태 버튼 */}
         <div className="mt-3 flex gap-3">
-          <button
-            type="button"
-            className={[
-              'px-4 py-2 rounded-lg border border-gray-lighter text-[16px] font-medium transition-colors',
-              condition === '최상' ? 'text-font-dark border-brown-accent' : 'text-gray-dark',
-            ].join(' ')}
-          >
-            최상
-          </button>
-          <button
-            type="button"
-            className="px-4 py-2 rounded-lg border border-gray-lighter text-[16px] font-medium text-gray-dark"
-          >
-            상
-          </button>
-          <button
-            type="button"
-            className="px-4 py-2 rounded-lg border border-gray-lighter text-[16px] font-medium text-gray-dark"
-          >
-            중
-          </button>
+          {(['최상', '상', '중'] as const).map((cond) => (
+            <span
+              key={cond}
+              className={[
+                'px-4 py-2 rounded-lg border text-[16px] font-medium',
+                product.extra?.condition === cond
+                  ? 'text-font-dark border-brown-accent'
+                  : 'text-gray-dark border-gray-lighter',
+              ].join(' ')}
+            >
+              {cond}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -158,29 +282,37 @@ export default function DetailPage() {
 
       {/* 프로필 카드 */}
       <div className="px-4 py-4 max-w-6xl mx-auto">
-        <h3 className={titleCls}>프로필 카드</h3>
+        <h3 className={titleCls}>판매자 정보</h3>
 
         <div className="mt-3 rounded-xl border border-gray-lighter p-4">
           <div className="flex items-start gap-3">
             {/* 프로필 이미지 */}
             <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-200 shrink-0">
-              <Image src="/images/profile1.jpg" alt="작성자 프로필" fill className="object-cover" />
+              {product.seller?.image ? (
+                <Image
+                  src={getImageUrl(product.seller.image)}
+                  alt={product.seller.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-500 text-lg font-bold">
+                  {product.seller?.name?.charAt(0) || '?'}
+                </div>
+              )}
             </div>
 
             {/* 닉네임 + 별점 */}
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[16px] font-semibold text-font-dark">
-                  책벌레
+                  {product.seller?.name || '판매자'}
                 </span>
 
                 <div className="flex items-center gap-1">
-                  <Star size={18} className="text-gray-dark" />
+                  <Star size={18} className="text-yellow-400 fill-yellow-400" />
                   <span className="text-[14px] font-medium text-gray-dark">
                     5.0
-                  </span>
-                  <span className="text-[14px] font-medium text-gray-dark">
-                    (100)
                   </span>
                 </div>
               </div>
@@ -189,6 +321,7 @@ export default function DetailPage() {
               <div className="mt-3 flex justify-end">
                 <button
                   type="button"
+                  onClick={handleChatClick}
                   className="px-4 py-2 rounded-lg bg-brown-guide text-font-white text-[14px] font-medium hover:opacity-90 transition-opacity"
                 >
                   채팅하기
@@ -198,6 +331,12 @@ export default function DetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ===== 모달: 로그인 ===== */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
 
       {/* ===== 모달: 도서 상태 기준 가이드 ===== */}
       {isGuideOpen && (

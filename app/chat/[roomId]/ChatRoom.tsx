@@ -50,7 +50,7 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
       // 전달받은 정보를 기반으로 해당 채팅방 입장
       // postId: 게시글 ID(게시글에 대한 작성자와의 채팅), userId: 사용자 ID(사용자와의 일반 채팅)
 
-      await enterRoom({ resourceType: 'product', resourceId: Number(roomId) });
+      await enterRoom({ resourceType: 'room', resourceId: Number(roomId) });
     };
 
     init();

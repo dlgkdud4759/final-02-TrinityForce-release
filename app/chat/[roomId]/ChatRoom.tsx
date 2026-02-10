@@ -123,43 +123,24 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
       {/* 게시글 정보 / 후기 작성 */}
       <div className="fixed right-0 left-0 bg-bg-primary border-b border-border-primary py-3 px-2 md:py-4 md:px-4 lg:px-6">
         <div className="flex flex-col gap-1 p-2 md:p-3">
-          {product ? (
-            <article className="flex items-center gap-2 md:gap-3">
-              <Image
-                className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-border-primary rounded-md object-cover"
-                alt="게시글 이미지"
-                src={getImageUrl(product.mainImages?.[0]?.path)}
-                width={56}
-                height={56}
-              />
-              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                <h3 className="text-sm md:text-base lg:text-lg font-semibold text-font-dark truncate">
-                  {product.name}
-                </h3>
-                <p className="text-xs md:text-sm font-medium text-gray-dark truncate">
-                  {product.content}
-                </p>
-              </div>
-            </article>
-          ) : (
-            <article className="flex items-center gap-2 md:gap-3">
-              <Image
-                className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-border-primary rounded-md object-cover"
-                alt="사용자 프로필"
-                src={partner?.image || '/images/Logo.png'}
-                width={56}
-                height={56}
-              />
-              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                <h3 className="text-sm md:text-base lg:text-lg font-semibold text-font-dark truncate">
-                  {partner?.name}
-                </h3>
-                <p className="text-xs md:text-sm font-medium text-gray-dark truncate">
-                  {activeRoom?.roomName}
-                </p>
-              </div>
-            </article>
-          )}
+          <article className="flex items-center gap-2 md:gap-3">
+            <Image
+              className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-border-primary rounded-md object-cover"
+              alt="게시글 이미지"
+              src={getImageUrl(product?.mainImages?.[0]?.path)}
+              width={56}
+              height={56}
+            />
+            <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+              <h3 className="text-sm md:text-base lg:text-lg font-semibold text-font-dark truncate">
+                {product?.name}
+              </h3>
+              <p className="text-xs md:text-sm font-medium text-gray-dark truncate">
+                {product?.content}
+              </p>
+            </div>
+          </article>
+
           <ChatTransactionButton />
         </div>
       </div>

@@ -107,7 +107,20 @@ export default function BookDetailPage() {
 
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {
-    return dateString;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    const dateStr = date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const timeStr = date.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    return `${dateStr} ${timeStr}`;
   };
 
   if (loading) {
@@ -162,7 +175,7 @@ export default function BookDetailPage() {
                 {likedPosts.has(product._id) ? (product.bookmarks || 0) + 1 : (product.bookmarks || 0)}
               </span>
             </div>
-            <p className="mt-1 text-[14px] font-medium text-gray-dark">
+            <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">
               {formatDate(product.createdAt)}
             </p>
           </div>

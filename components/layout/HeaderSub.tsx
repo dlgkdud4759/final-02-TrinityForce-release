@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Bell, ChevronLeft } from 'lucide-react';
 import { useRequireAuth } from '@/app/hooks/useRequireAuth';
 import LoginModal from '@/components/modals/LoginModal';
+import { useLocationStore } from '@/zustand/useLocationStore';
 
 interface HeaderSubProps {
   title?: string;
@@ -14,6 +15,7 @@ interface HeaderSubProps {
 export default function HeaderSub({ title = '헤더', backUrl }: HeaderSubProps) {
   const router = useRouter();
   const { showLogin, setShowLogin, checkAuth } = useRequireAuth();
+  const address = useLocationStore((state) => state.address);
 
   const goToAlert = () => {
     checkAuth(() => {
@@ -43,8 +45,13 @@ export default function HeaderSub({ title = '헤더', backUrl }: HeaderSubProps)
         <div className="flex items-center gap-3">
 
           {/* 위치 재설정 버튼 */}
-          <Link href="/location" aria-label="위치 설정" className="cursor-pointer">
+          <Link href="/location" aria-label="위치 설정" className="flex items-center gap-1 cursor-pointer">
             <MapPin size={24} className="text-font-dark" />
+            {address && (
+              <span className="text-sm text-font-dark font-medium max-w-20 truncate">
+                {address}
+              </span>
+            )}
           </Link>
 
           {/* 알림 버튼 */}

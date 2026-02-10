@@ -72,7 +72,7 @@ export default function SearchInput({
       {/* 검색 아이콘 버튼 */}
       <button
         onClick={handleSearch}
-        className="px-3 text-brown-accent"
+        className="px-3 text-brown-accent cursor-pointer"
         aria-label="검색"
       >
         <SearchIcon className="w-4 h-4"/>

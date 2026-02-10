@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
@@ -39,29 +39,39 @@ const fallbackPost: MeetupPost = {
 };
 
 type Comment = {
-  id: number;
-  profileImage?: string;
-  nickname: string;
+  _id: number;
+  user?: { _id: number; name: string; image?: string };
   content: string;
-  isMyComment?: boolean;
-  userId?: number;
+  createdAt?: string;
 };
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return isNaN(date.getTime())
-    ? dateString
-    : date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
+  if (isNaN(date.getTime())) return dateString;
+
+  const dateStr = date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const timeStr = date.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  return `${dateStr} ${timeStr}`;
 };
 
 const getImageUrl = (image?: MeetupPost['image']) => {
   if (!image) return null;
   const path = typeof image === 'string' ? image : image.path;
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  return `${API_URL}/${path}`;
+};
+
+const getUserImageUrl = (path?: string) => {
   if (!path) return null;
   if (path.startsWith('http')) return path;
   return `${API_URL}/${path}`;
@@ -78,41 +88,39 @@ export default function MeetupPostDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState<Comment[]>([]);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  // TODO: 댓글 API 연동 전까지는 빈 배열로 유지
-  const comments: Comment[] = [];
+  const fetchPost = useCallback(async () => {
+    if (!postId) return;
+    try {
+      setIsLoading(true);
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
+        headers: { 'client-id': CLIENT_ID || '' },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || '모임 게시글을 불러오는데 실패했습니다.');
+      }
+
+      if (data.item?.type && data.item.type !== 'meetup') {
+        throw new Error('모임 게시글이 아닙니다.');
+      }
+
+      setPost(data.item);
+      setComments(data.item?.replies || []);
+    } catch (err) {
+      console.error('모임 게시글 조회 실패:', err);
+      setError('모임 게시글을 불러오는데 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [postId]);
 
   useEffect(() => {
-    if (!postId) return;
-
-    const fetchPost = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`${API_URL}/posts/${postId}`, {
-          headers: { 'client-id': CLIENT_ID || '' },
-        });
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          throw new Error(data.message || '모임 게시글을 불러오는데 실패했습니다.');
-        }
-
-        if (data.item?.type && data.item.type !== 'meetup') {
-          throw new Error('모임 게시글이 아닙니다.');
-        }
-
-        setPost(data.item);
-      } catch (err) {
-        console.error('모임 게시글 조회 실패:', err);
-        setError('모임 게시글을 불러오는데 실패했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchPost();
-  }, [postId]);
+  }, [fetchPost]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -131,13 +139,38 @@ export default function MeetupPostDetail() {
     }
   }, [isLoggedIn]);
 
-  const handleCommentSubmit = () => {
+  const handleCommentSubmit = async () => {
     if (!isLoggedIn) {
       setIsLoginModalOpen(true);
       return;
     }
-    // TODO: 댓글 API 연동 시 여기에 추가
-    setCommentText('');
+    if (!commentText.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+    if (!postId) return;
+
+    try {
+      const axios = getAxios();
+      const response = await axios.post(`/posts/${postId}/replies`, {
+        content: commentText.trim(),
+      });
+
+      if (response.data?.ok) {
+        const newReply = response.data.item;
+        if (newReply) {
+          setComments((prev) => [...prev, newReply]);
+        } else {
+          await fetchPost();
+        }
+        setCommentText('');
+        return;
+      }
+      alert('댓글 등록에 실패했습니다.');
+    } catch (error) {
+      console.error('댓글 등록 실패:', error);
+      handleAxiosError(error);
+    }
   };
 
   const handleDeletePost = async () => {
@@ -159,6 +192,28 @@ export default function MeetupPostDetail() {
       alert('게시글 삭제에 실패했습니다.');
     } catch (error) {
       console.error('게시글 삭제 실패:', error);
+      handleAxiosError(error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!postId) return;
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    if (!confirm('댓글을 삭제할까요?')) return;
+
+    try {
+      const axios = getAxios();
+      const response = await axios.delete(`/posts/${postId}/replies/${commentId}`);
+      if (response.data?.ok) {
+        setComments((prev) => prev.filter((c) => c._id !== commentId));
+        return;
+      }
+      alert('댓글 삭제에 실패했습니다.');
+    } catch (error) {
+      console.error('댓글 삭제 실패:', error);
       handleAxiosError(error);
     }
   };
@@ -268,21 +323,22 @@ export default function MeetupPostDetail() {
           </div>
         ) : (
           comments.map((comment) => (
-            <div key={comment.id}>
+            <div key={comment._id}>
               <div className="px-4 py-4 md:px-6 md:py-6">
                 <div className="flex gap-3 md:gap-4">
                   {/* 프로필 이미지 */}
                   <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-gray-200 shrink-0">
-                    {comment.profileImage ? (
+                    {comment.user?.image ? (
                       <Image
-                        src={comment.profileImage}
-                        alt={comment.nickname}
+                        src={getUserImageUrl(comment.user.image) || ''}
+                        alt={comment.user?.name || '사용자'}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-500 text-lg font-bold">
-                        {comment.nickname.charAt(0)}
+                        {comment.user?.name?.charAt(0) || '?'}
                       </div>
                     )}
                   </div>
@@ -290,14 +346,15 @@ export default function MeetupPostDetail() {
                   {/* 댓글 내용 */}
                   <div className="flex-1">
                     <p className="text-sm md:text-base font-semibold text-font-dark mb-1">
-                      {comment.nickname}
+                      {comment.user?.name || '알 수 없음'}
                     </p>
                     <p className="text-sm md:text-base text-font-dark">{comment.content}</p>
-                    {(comment.isMyComment || (comment.userId && comment.userId === currentUserId)) && (
+                    {comment.user?._id && comment.user._id === currentUserId && (
                       <div className="flex justify-end mt-2">
                         <button
                           type="button"
-                          className="text-[12px] md:text-[14px] text-gray-dark hover:text-brown-accent transition-colors"
+                          onClick={() => handleDeleteComment(comment._id)}
+                          className="text-[12px] md:text-[14px] text-gray-dark hover:text-brown-accent transition-colors cursor-pointer"
                         >
                           삭제
                         </button>

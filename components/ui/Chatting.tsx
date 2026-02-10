@@ -7,7 +7,6 @@ interface MessageBubbleProps {
   isMine: boolean; // 본인이 보낸 메시지인지 여부
   sender?: User; // 메시지 발신인 정보 (상대방 메시지인 경우에만 주로 사용)
   currentUser?: User; // 현재 로그인한 사용자 정보 추가
-  showTimestamp?: boolean; // 시간 표시 여부 추가
 }
 
 export default function Chatting({
@@ -23,6 +22,11 @@ export default function Chatting({
   const bubbleCls = isMine
     ? 'rounded-tl-xl rounded-b-xl bg-brown-accent text-white'
     : 'rounded-tr-xl rounded-b-xl bg-brown-guide text-white';
+
+  // 읽음/미읽음 상태 판단
+  const isRead = isMine
+    ? sender && message.readUserIds?.includes(sender._id)
+    : true;
 
   // 시간 포맷팅 함수
   const formatTime = (timestamp: Date | string) => {
@@ -51,7 +55,9 @@ export default function Chatting({
           {/* 메타 정보: 내 메시지면 앞에, 상대 메시지면 뒤에 렌더링 용도 */}
           {isMine ? (
             <div className="flex flex-col pt-1.5 items-end">
-              <div className="text-[8px] font-bold text-green-primary">1</div>
+              <div className="text-[8px] font-bold text-green-primary">
+                {isRead ? '' : '1'}
+              </div>
               <div className="text-[8px] font-bold text-gray-dark">
                 {formatTime(message.createdAt)}
               </div>
@@ -68,7 +74,9 @@ export default function Chatting({
 
           {!isMine ? (
             <div className="flex flex-col pt-1.5">
-              <div className="text-[8px] font-bold text-green-primary">1</div>
+              <div className="text-[8px] font-bold text-green-primary">
+                {isRead ? '' : '1'}
+              </div>
               <div className="text-[8px] font-bold text-gray-dark">
                 {formatTime(message.createdAt)}
               </div>

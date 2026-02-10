@@ -6,14 +6,19 @@ interface MessageBubbleProps {
   message: ChatMessage; // 표시할 메시지 객체
   isMine: boolean; // 본인이 보낸 메시지인지 여부
   sender?: User; // 메시지 발신인 정보 (상대방 메시지인 경우에만 주로 사용)
+  currentUser?: User; // 현재 로그인한 사용자 정보 추가
 }
 
 export default function Chatting({
   message,
   isMine,
   sender,
+  currentUser,
 }: MessageBubbleProps) {
-  const avatarSrc = sender?.image || '/images/Logo.png';
+  // 본인 메시지면 currentUser의 이미지, 상대방 메시지면 sender의 이미지
+  const avatarSrc = isMine
+    ? currentUser?.image || '/images/Logo.png'
+    : sender?.image || '/images/Logo.png';
 
   const wrapperCls = isMine ? 'flex-row-reverse' : 'flex';
   const bubbleCls = isMine

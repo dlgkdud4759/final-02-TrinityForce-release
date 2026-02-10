@@ -108,6 +108,7 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
             message={msg}
             isMine={String(msg.senderId) === String(user._id)}
             sender={partner || undefined}
+            currentUser={user}
           />
         ))}
       </div>

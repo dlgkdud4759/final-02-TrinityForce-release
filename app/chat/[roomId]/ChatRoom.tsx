@@ -74,7 +74,7 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
 
   return (
     <>
-      <HeaderSub />
+      <HeaderSub title={partner?.name} />
 
       {/* 게시글 정보 / 후기 작성 */}
       <div className="fixed right-0 left-0 bg-bg-primary border-b border-border-primary py-4 px-2">

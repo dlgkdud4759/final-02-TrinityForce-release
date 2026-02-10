@@ -10,6 +10,9 @@ import LoginModal from '@/components/modals/LoginModal';
 import { useUserStore } from '@/zustand/useUserStore';
 import { useLikeStore } from '@/zustand/useLikeStore';
 
+import { saveRecentView } from '@/utils/recentViews'
+import { getUser } from '@/utils/user'
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
 
@@ -77,6 +80,11 @@ export default function BookDetailPage() {
         }
 
         setProduct(data.item);
+
+        if (data.item) {
+          const currentUser = getUser()
+          saveRecentView(data.item, currentUser?._id)
+        }
       } catch (err) {
         console.error('도서 조회 실패:', err);
         setError('도서 정보를 불러오는데 실패했습니다.');

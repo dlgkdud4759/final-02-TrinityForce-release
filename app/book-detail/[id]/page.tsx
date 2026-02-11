@@ -9,9 +9,10 @@ import HeaderSub from '@/components/layout/HeaderSub';
 import LoginModal from '@/components/modals/LoginModal';
 import { useUserStore } from '@/zustand/useUserStore';
 import { useLikeStore } from '@/zustand/useLikeStore';
+import useChat from '@/app/chat/_hooks/useChat';
 
-import { saveRecentView } from '@/utils/recentViews'
-import { getUser } from '@/utils/user'
+import { saveRecentView } from '@/utils/recentViews';
+import { getUser } from '@/utils/user';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -48,6 +49,7 @@ export default function BookDetailPage() {
   const dividerCls = 'border-t border-gray-lighter';
 
   const { likedPosts, toggleLike } = useLikeStore();
+  const { enterRoom } = useChat();
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,12 +57,21 @@ export default function BookDetailPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isLoggedIn = useUserStore((state) => state.isLoggedIn);
 
-  const handleChatClick = () => {
+  const handleChatClick = async () => {
     if (!isLoggedIn) {
       setIsLoginModalOpen(true);
       return;
     }
-    router.push(`/chat`);
+
+    try {
+      // 이 상품에 대한 판매자와의 채팅방 진입 (없으면 자동 생성)
+      await enterRoom({ resourceType: 'product', resourceId: product!._id });
+
+      // 채팅 페이지로 이동
+      router.push('/chat');
+    } catch (error) {
+      console.error('채팅방 입장 실패:', error);
+    }
   };
 
   // 데이터 불러오기
@@ -76,14 +87,16 @@ export default function BookDetailPage() {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.message || '도서 정보를 불러오는데 실패했습니다.');
+          throw new Error(
+            data.message || '도서 정보를 불러오는데 실패했습니다.'
+          );
         }
 
         setProduct(data.item);
 
         if (data.item) {
-          const currentUser = getUser()
-          saveRecentView(data.item, currentUser?._id)
+          const currentUser = getUser();
+          saveRecentView(data.item, currentUser?._id);
         }
       } catch (err) {
         console.error('도서 조회 실패:', err);
@@ -134,7 +147,9 @@ export default function BookDetailPage() {
   if (error || !product) {
     return (
       <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center gap-4">
-        <p className="text-font-dark">{error || '게시글을 찾을 수 없습니다.'}</p>
+        <p className="text-font-dark">
+          {error || '게시글을 찾을 수 없습니다.'}
+        </p>
         <button
           type="button"
           onClick={() => router.back()}
@@ -172,7 +187,9 @@ export default function BookDetailPage() {
                 />
               </button>
               <span className="text-[16px] font-medium text-gray-medium">
-                {likedPosts.has(product._id) ? (product.bookmarks || 0) + 1 : (product.bookmarks || 0)}
+                {likedPosts.has(product._id)
+                  ? (product.bookmarks || 0) + 1
+                  : product.bookmarks || 0}
               </span>
             </div>
             <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">
@@ -219,7 +236,10 @@ export default function BookDetailPage() {
             {/* 가로 슬라이드 */}
             <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
               {product.mainImages.map((img, idx) => (
-                <div key={idx} className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter">
+                <div
+                  key={idx}
+                  className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter"
+                >
                   <Image
                     src={getImageUrl(img.path)}
                     alt={`${product.name} ${idx + 1}`}
@@ -347,7 +367,9 @@ export default function BookDetailPage() {
         >
           <div className="w-full max-w-md rounded-2xl bg-bg-primary p-5">
             <div className="flex items-center justify-between">
-              <h4 className="text-[18px] font-semibold text-font-dark">도서 상태 기준</h4>
+              <h4 className="text-[18px] font-semibold text-font-dark">
+                도서 상태 기준
+              </h4>
               <button
                 type="button"
                 onClick={() => setIsGuideOpen(false)}
@@ -363,38 +385,64 @@ export default function BookDetailPage() {
               <table className="w-full text-[8px] text-font-dark">
                 <thead>
                   <tr>
-                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[50px]">구분</th>
-                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[140px]">헌 상태</th>
-                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[150px]">표지</th>
-                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[140px]">책등 / 책배</th>
-                    <th className="bg-brown-accent text-font-white p-2 border-b border-gray-lighter min-w-[160px]">내부 / 제본상태</th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[50px]">
+                      구분
+                    </th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[140px]">
+                      헌 상태
+                    </th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[150px]">
+                      표지
+                    </th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter min-w-[140px]">
+                      책등 / 책배
+                    </th>
+                    <th className="bg-brown-accent text-font-white p-2 border-b border-gray-lighter min-w-[160px]">
+                      내부 / 제본상태
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">최상</td>
-                    <td className="p-2 border-b border-r border-gray-lighter align-top">새것에 가까운 책</td>
+                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">
+                      최상
+                    </td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top">
+                      새것에 가까운 책
+                    </td>
                     <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 찢어진 흔적 없음\n닳은 흔적 없음, 낙서 없음\n얼룩 없음, 양장본의 겉표지 있음`}</td>
                     <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 낙서 없음\n닳은 흔적 없음, 얼룩 없음`}</td>
                     <td className="p-2 border-b border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 낙서 없음, 변형 없음\n얼룩 없음, 접힌 흔적 없음\n제본 탈착 없음`}</td>
                   </tr>
                   <tr>
-                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">상</td>
-                    <td className="p-2 border-b border-r border-gray-lighter align-top">약간의 사용감은 있으나 깨끗한 책</td>
+                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">
+                      상
+                    </td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top">
+                      약간의 사용감은 있으나 깨끗한 책
+                    </td>
                     <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`희미한 변색이나 작은 얼룩이 있음\n찢어진 흔적 없음\n약간의 모서리 해짐\n낙서 없음, 양장본의 겉표지 있음`}</td>
                     <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`희미한 변색이나 작은 얼룩이 있음\n약간의 닳은 흔적 있음\n낙서 없음`}</td>
                     <td className="p-2 border-b border-gray-lighter align-top whitespace-pre-line">{`변색 없음, 낙서 없음, 변형 없음\n아주 약간의 접힌 흔적 있음\n얼룩 없음, 제본 탈착 없음`}</td>
                   </tr>
                   <tr>
-                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">중</td>
-                    <td className="p-2 border-b border-r border-gray-lighter align-top">사용감이 많으며 헌 느낌이 나는 책</td>
+                    <td className="bg-brown-accent text-font-white p-2 border-b border-r border-gray-lighter text-center font-medium">
+                      중
+                    </td>
+                    <td className="p-2 border-b border-r border-gray-lighter align-top">
+                      사용감이 많으며 헌 느낌이 나는 책
+                    </td>
                     <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`전체적인 변색, 모서리 해짐 있음\n2cm 이하의 찢어짐, 오염 있음\n낙서 있음, 양장본의 겉표지 없음`}</td>
                     <td className="p-2 border-b border-r border-gray-lighter align-top whitespace-pre-line">{`전체적인 변색, 모서리 해짐 있음\n오염 있음, 낙서 있음(이름 포함)`}</td>
                     <td className="p-2 border-b border-gray-lighter align-top whitespace-pre-line">{`변색 있음, 2cm 이하 찢어짐 있음\n5쪽 이하의 필기 및 밑줄 있음\n얼룩 및 오염 있음, 제본 탈착 없음`}</td>
                   </tr>
                   <tr>
-                    <td className="bg-brown-accent text-font-white p-2 border-r border-gray-lighter text-center font-medium">매입불가</td>
-                    <td className="p-2 border-r border-gray-lighter align-top">독서 및 이용에 지장이 있는 책</td>
+                    <td className="bg-brown-accent text-font-white p-2 border-r border-gray-lighter text-center font-medium">
+                      매입불가
+                    </td>
+                    <td className="p-2 border-r border-gray-lighter align-top">
+                      독서 및 이용에 지장이 있는 책
+                    </td>
                     <td className="p-2 border-r border-gray-lighter align-top whitespace-pre-line">{`2cm 초과한 찢어짐 있음\n심한 오염 및 낙서 있음\n물에 젖은 흔적 있음`}</td>
                     <td className="p-2 border-r border-gray-lighter align-top whitespace-pre-line">{`심한 오염 있음, 심한 낙서 있음\n물에 젖은 흔적 있음`}</td>
                     <td className="p-2 border-gray-lighter align-top whitespace-pre-line">{`2cm 초과한 찢어짐, 5쪽 초과 낙서\n심한 오염 이나 젖은 흔적 있음\n낙장 등의 제본불량, 분책 된 경우`}</td>

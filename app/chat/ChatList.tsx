@@ -5,6 +5,7 @@ import useChat from './_hooks/useChat';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import ChatItem from '@/components/ui/ChatItem';
+import HeaderSub from '@/components/layout/HeaderSub';
 
 export default function ChatList() {
   const {
@@ -38,33 +39,37 @@ export default function ChatList() {
   }
 
   return (
-    <main className="fixed top-17.5 left-0 right-0 bottom-0 flex flex-col overflow-hidden bg-white dark:bg-gray-800 z-0">
-      <div className="flex-1 flex items-stretch h-full min-h-0 overflow-hidden">
-        {/* 채팅방 목록 */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
-          {rooms.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-gray-400 text-center">
-              <p className="text-sm">참여 중인 대화가 없습니다.</p>
-            </div>
-          ) : (
-            rooms.map((room) => (
-              <ChatItem
-                key={room._id}
-                room={room}
-                isActive={activeRoomId === room._id}
-                onSelect={(id) => {
-                  enterRoom({ resourceType: 'room', resourceId: Number(id) });
-                  // 선택 시 URL 파라미터 초기화
-                  router.replace(pathname);
-                }}
-                onLeave={(id) => {
-                  leaveRoom(Number(id));
-                }}
-              />
-            ))
-          )}
+    <>
+      <HeaderSub title="채팅" />
+
+      <main className="fixed top-17.5 left-0 right-0 bottom-0 flex flex-col overflow-hidden bg-white dark:bg-gray-800 z-0">
+        <div className="flex-1 flex items-stretch h-full min-h-0 overflow-hidden">
+          {/* 채팅방 목록 */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+            {rooms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-gray-400 text-center">
+                <p className="text-sm">참여 중인 대화가 없습니다.</p>
+              </div>
+            ) : (
+              rooms.map((room) => (
+                <ChatItem
+                  key={room._id}
+                  room={room}
+                  isActive={activeRoomId === room._id}
+                  onSelect={(id) => {
+                    enterRoom({ resourceType: 'room', resourceId: Number(id) });
+                    // 선택 시 URL 파라미터 초기화
+                    router.replace(pathname);
+                  }}
+                  onLeave={(id) => {
+                    leaveRoom(Number(id));
+                  }}
+                />
+              ))
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

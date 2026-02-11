@@ -1,5 +1,6 @@
 import { ChatMessage } from '@/app/chat/_types/chat';
 import { User } from '@/types/user';
+import DOMPurify from 'dompurify';
 import Image from 'next/image';
 
 interface MessageBubbleProps {
@@ -7,7 +8,6 @@ interface MessageBubbleProps {
   isMine: boolean; // 본인이 보낸 메시지인지 여부
   sender?: User; // 메시지 발신인 정보 (상대방 메시지인 경우에만 주로 사용)
   currentUser?: User; // 현재 로그인한 사용자 정보 추가
-  showTimestamp?: boolean; // 시간 표시 여부 추가
 }
 
 export default function Chatting({
@@ -24,6 +24,11 @@ export default function Chatting({
     ? 'rounded-tl-xl rounded-b-xl bg-brown-accent text-white'
     : 'rounded-tr-xl rounded-b-xl bg-brown-guide text-white';
 
+  // 읽음/미읽음 상태 판단
+  const isRead = isMine
+    ? sender && message.readUserIds?.includes(sender._id)
+    : true;
+
   // 시간 포맷팅 함수
   const formatTime = (timestamp: Date | string) => {
     const date = new Date(timestamp);
@@ -32,6 +37,22 @@ export default function Chatting({
     const period = hours >= 12 ? '오후' : '오전';
     const displayHours = hours % 12 || 12;
     return `${period} ${displayHours}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  // HTML을 안전하게 렌더링하는 함수
+  const sanitizeAndRenderHTML = (content: string) => {
+    // DOMPurify로 XSS 공격 방지
+    const cleanHTML = DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: ['img', 'br'], // img와 br만 허용
+      ALLOWED_ATTR: ['src', 'alt', 'style'], // src, alt, style 속성만 허용
+    });
+
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: cleanHTML }}
+        className="message-content"
+      />
+    );
   };
 
   return (
@@ -48,10 +69,12 @@ export default function Chatting({
         )}
 
         <div className="flex gap-2 items-end">
-          {/* 메타 정보: 내 메시지면 앞에, 상대 메시지면 뒤에 렌더링 용도 */}
+          {/* 내 메시지면 앞에, 상대 메시지면 뒤에 렌더링 용도 */}
           {isMine ? (
             <div className="flex flex-col pt-1.5 items-end">
-              <div className="text-[8px] font-bold text-green-primary">1</div>
+              <div className="text-[8px] font-bold text-green-primary">
+                {isRead ? '' : '1'}
+              </div>
               <div className="text-[8px] font-bold text-gray-dark">
                 {formatTime(message.createdAt)}
               </div>
@@ -61,14 +84,16 @@ export default function Chatting({
           <div className="flex gap-1 items-center pt-3.5">
             <div className={bubbleCls}>
               <div className="text-sm font-bold mx-2 my-1">
-                {message.content}
+                {sanitizeAndRenderHTML(message.content)}
               </div>
             </div>
           </div>
 
           {!isMine ? (
             <div className="flex flex-col pt-1.5">
-              <div className="text-[8px] font-bold text-green-primary">1</div>
+              <div className="text-[8px] font-bold text-green-primary">
+                {isRead ? '' : '1'}
+              </div>
               <div className="text-[8px] font-bold text-gray-dark">
                 {formatTime(message.createdAt)}
               </div>

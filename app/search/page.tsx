@@ -7,6 +7,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { getAxios, handleAxiosError } from '@/utils/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HeaderSub from '@/components/layout/HeaderSub';
+import { useUserStore } from '@/zustand/useUserStore';
 
 type SearchResult = {
   _id: number;
@@ -22,6 +23,7 @@ type SearchResult = {
   seller: {
     name: string;
     image?: string;
+    address?: string;
   };
 };
 
@@ -40,6 +42,10 @@ export default function SearchPage() {
     }
     return [];
   });
+
+  // 유저 주소 가져오기
+  const user = useUserStore((state) => state.user);
+  const userAddress = user?.address;
 
   // 검색 실행
   const handleSearch = useCallback(async (keyword: string, category: string) => {
@@ -67,7 +73,17 @@ export default function SearchPage() {
 
       const response = await axios.get(`/products`, { params });
 
-      setSearchResults(response.data.item || []);
+      let results = response.data.item || [];
+
+      // 위치 필터링
+        if (userAddress) {
+          const userRegion = userAddress.split(' ')[1]  // "서초구" 추출
+          results = results.filter((item: SearchResult) => {
+            return item.seller?.address?.includes(userRegion)
+          })
+        }
+
+      setSearchResults(results);
 
       // 최근 검색어
       setRecentSearches(prev => {
@@ -85,7 +101,7 @@ export default function SearchPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [userAddress]);
 
   // URL 파라미터로 전달된 검색어 자동 검색
   useEffect(() => {
@@ -118,7 +134,14 @@ export default function SearchPage() {
     <div className="min-h-screen w-full bg-bg-primary">
       <HeaderSub title='검색'
       backUrl='/'/>
-      <div className="px-4 py-6 max-w-md mx-auto">        
+      <div className="px-4 py-6 max-w-md mx-auto">
+        {/* 위치 표시 */}
+        {userAddress && (
+          <div className="mb-4 text-sm text-gray-dark text-center">
+            📍 {userAddress} 기준 검색
+          </div>
+        )}
+        
         {/* 검색창 */}
         <SearchInput
           value={searchQuery}

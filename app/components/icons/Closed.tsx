@@ -3,23 +3,25 @@ export function ClosedIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
-      width={28}
-      height={28}
+      width={24}
+      height={24}
       viewBox="0 0 28 28"
-      fill="currentColor"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
         d="M21 7L7 21"
-        stroke="black"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M7 7L21 21"
-        stroke="black"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

@@ -77,7 +77,7 @@ export default function SearchPage() {
 
       // 위치 필터링
         if (userAddress) {
-          const userRegion = userAddress.split(' ')[1]  // "서초구" 추출
+          const userRegion = userAddress.split(' ')[1]  // "서초구", "송파구" 등 구 단위 추출
           results = results.filter((item: SearchResult) => {
             return item.seller?.address?.includes(userRegion)
           })

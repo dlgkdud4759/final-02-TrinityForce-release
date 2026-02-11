@@ -1,6 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 2조: 삼위일체
 
-## Getting Started
+[![동네책장 로고](./public/images/Logo.png)]([배포주소](https://trinityforce.vercel.app/))
 
 First, run the development server:
 

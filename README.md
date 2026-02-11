@@ -19,7 +19,7 @@
 
 ## 👥 역할 분담
 
-| ![로사](https://github.com/user-attachments/assets/9bda0697-6161-4afb-865b-e6ba2d1e2969)|  ![나옹이](https://github.com/user-attachments/assets/c2a40d99-28dc-4e5e-bd8d-7227b20637bc)
+| ![로사](https://github.com/user-attachments/assets/9bda0697-6161-4afb-865b-e6ba2d1e2969)|  ![나옹이](https://github.com/user-attachments/assets/cdc3912a-d6d1-4750-a15d-94d6776cb4b5)
 |  ![로이](https://github.com/user-attachments/assets/c0a7e8e2-700c-485f-a431-2a26fa779315)|
 |------|------|------|
 | 김하연 | 조시연 | 이하영 |

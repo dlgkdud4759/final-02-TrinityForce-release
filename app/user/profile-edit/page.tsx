@@ -9,6 +9,19 @@ import HeaderSub from "@/components/layout/HeaderSub"
 import { getUser, setUser as setLocalUser } from "@/utils/user"
 import { getAxios, handleAxiosError } from "@/utils/axios"
 import type { UserDetail } from "@/types/user"
+import Script from "next/script"
+
+
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (config: {
+        oncomplete: (data: { address: string }) => void
+      }) => { open: () => void }
+    }
+  }
+}
+
 
 export default function ProfileEditPage() {
   const router = useRouter()
@@ -24,6 +37,8 @@ export default function ProfileEditPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+
+  const [address, setAddress] = useState(currentUser?.address || '')
   
   // 닉네임 중복 확인
   const handleCheckNickname = async () => {
@@ -66,30 +81,49 @@ export default function ProfileEditPage() {
     setIsNicknameChecked(false)
     setIsNicknameAvailable(false)
   }
-  
+    // 주소 검색
+    const handleAddressSearch = () => {
+    if (typeof window === 'undefined' || !window.daum) {
+      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
+      return
+    }
+    new window.daum.Postcode({
+      oncomplete: (data: { address: string }) => {
+        setAddress(data.address)
+      }
+    }).open()
+  }
+
+
   // 닉네임 변경 완료
   const handleSubmit = async () => {
-    if (nickname === currentUser?.name) {
+    const isNicknameChanged = nickname !== currentUser?.name
+    const isAddressChanged = address !== currentUser?.address
+
+
+    if (!isNicknameChanged && !isAddressChanged) {
       alert('변경사항이 없습니다.')
       return
     }
     
-    if (!isNicknameChecked || !isNicknameAvailable) {
+    if (isNicknameChanged && (!isNicknameChecked || !isNicknameAvailable)) {
       alert('닉네임 중복 확인을 해주세요.')
       return
     }
     
     try {
       const axios = getAxios()
-      await axios.patch(`/users/${currentUser?._id}`, {
-        name: nickname
-      })
+
+      const updateData: { name?: string; address?: string } = {}
+      if (isNicknameChanged) updateData.name = nickname
+      if (isAddressChanged) updateData.address = address
       
-      // 업데이트
-      const updatedUser = { ...currentUser, name: nickname } as UserDetail
+      await axios.patch(`/users/${currentUser?._id}`, updateData)
+      
+      const updatedUser = { ...currentUser, ...updateData } as UserDetail
       setLocalUser(updatedUser)
       
-      alert('닉네임이 변경되었습니다!')
+      alert('프로필이 변경되었습니다!')
       router.push('/user/mypage')
     } catch (error) {
       console.error('닉네임 변경 에러:', error)
@@ -139,6 +173,11 @@ export default function ProfileEditPage() {
   }
 
   return (
+    <>
+    <Script
+        src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+        strategy="afterInteractive"
+      />
     <div className="min-h-screen w-full bg-bg-primary">
       <HeaderSub title="프로필 수정" backUrl="/user/mypage" />
       
@@ -157,6 +196,20 @@ export default function ProfileEditPage() {
             onButtonClick={handleCheckNickname}
           />
         </div>
+
+        {/* 주소 변경 */}
+          <div className="mb-4 flex flex-col items-center">
+            <label className="w-full text-sm font-medium text-font-dark mb-2">
+              주소
+            </label>
+            <InputWithButton
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="주소 검색 버튼을 눌러주세요"
+              buttonText="검색"
+              onButtonClick={handleAddressSearch}
+            />
+          </div>
 
         {/* 비밀번호 변경 */}
         <div className="mb-6 flex flex-col items-center">
@@ -237,5 +290,6 @@ export default function ProfileEditPage() {
         </div>
       </Modal>
     </div>
+    </>
   )
 }

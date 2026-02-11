@@ -5,7 +5,12 @@ import { CompleteIcon } from '@/app/components/icons/Complete';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function ChatTransactionButton() {
+type Props = {
+  orderId: number
+  productId: number
+}
+
+export default function ChatTransactionButton({ orderId, productId }: Props) {
   const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
@@ -17,7 +22,7 @@ export default function ChatTransactionButton() {
 
   const handleReview = () => {
     // 후기 작성 페이지로 이동
-    router.push('/reviews/write');
+    router.push(`/reviews/write?orderId=${orderId}&productId=${productId}`);
     console.log('후기 작성하기');
   };
   return (

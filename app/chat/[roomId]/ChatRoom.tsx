@@ -128,9 +128,12 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
               </p>
             </div>
           </article>
-
+          
           {/* 완료 / 후기 버튼 */}
-          <ChatTransactionButton />
+          <ChatTransactionButton
+          orderId={activeRoom?._id || 0}
+          productId={activeRoom?.resourceId || 0}
+          />
         </div>
       </div>
 

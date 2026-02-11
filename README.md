@@ -1,8 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 2조: 삼위일체
 
-## Getting Started
+[![동네책장 로고](./public/images/Logo.png)](https://trinityforce.vercel.app/)
 
-First, run the development server:
+## 동네책장
+### **다 읽은 책, 버리지 마세요! 📚**
+
+읽지 않는 책이 책장에 쌓여만 가고 있나요?
+
+새 책을 사기엔 부담스럽고, 중고거래는 번거롭다면?
+
+**동네책장**
+
+*동네 사람들의 책이 모이는 곳*
+
+동네책장은 이웃과 함께 책을 교환하는 플랫폼입니다.
+
+읽은 책은 나누고, 읽고 싶은 책은 만나보세요.
 
 ```bash
 npm run dev

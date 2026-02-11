@@ -10,6 +10,7 @@ import LoginModal from '@/components/modals/LoginModal';
 import { useUserStore } from '@/zustand/useUserStore';
 import { useLikeStore } from '@/zustand/useLikeStore';
 import useChat from '@/app/chat/_hooks/useChat';
+import { ApiError } from '@/app/chat/_api/api';
 
 import { saveRecentView } from '@/utils/recentViews';
 import { getUser } from '@/utils/user';
@@ -55,7 +56,7 @@ export default function BookDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  const { isLoggedIn, user } = useUserStore();
 
   const handleChatClick = async () => {
     if (!isLoggedIn) {
@@ -73,6 +74,10 @@ export default function BookDetailPage() {
       }
     } catch (error) {
       console.error('채팅방 입장 실패:', error);
+      // 토큰 만료 시 로그인 모달 표시
+      if (error instanceof ApiError && error.status === 401) {
+        setIsLoginModalOpen(true);
+      }
     }
   };
 
@@ -339,16 +344,18 @@ export default function BookDetailPage() {
                 </div>
               </div>
 
-              {/* 채팅하기 버튼 */}
-              <div className="mt-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleChatClick}
-                  className="px-4 py-2 rounded-lg bg-brown-guide text-font-white text-[14px] font-medium hover:opacity-90 transition-opacity"
-                >
-                  채팅하기
-                </button>
-              </div>
+              {/* 채팅하기 버튼 - 본인 글이 아닐 때만 표시 */}
+              {user?._id !== product.seller_id && (
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleChatClick}
+                    className="px-4 py-2 rounded-lg bg-brown-guide text-font-white text-[14px] font-medium hover:opacity-90 transition-opacity"
+                  >
+                    채팅하기
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

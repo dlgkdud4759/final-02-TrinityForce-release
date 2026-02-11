@@ -4,6 +4,7 @@ import { useMemo, useRef, useState, useEffect, useSyncExternalStore } from 'reac
 import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
 import { useUserStore } from '@/zustand/useUserStore';
+import { useLocationStore } from '@/zustand/useLocationStore';
 import useAuthStatus from '@/utils/useAuthStatus';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -30,6 +31,7 @@ export default function Page() {
   const router = useRouter();
   const hasMounted = useHasMounted();
   const { user, initUser } = useUserStore();
+  const { address: userLocation } = useLocationStore();
   const isLoggedIn = useAuthStatus();
 
   // 컴포넌트 마운트 시 저장된 로그인 정보 확인
@@ -202,6 +204,7 @@ export default function Page() {
           author,
           condition,
           category,
+          location: userLocation || null,
         },
       };
 

@@ -6,6 +6,7 @@ import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SearchInput from '@/components/common/SearchInput';
+import { useLocationStore } from '@/zustand/useLocationStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -27,12 +28,14 @@ interface Product {
     author?: string;
     condition?: string;
     category?: string;
+    location?: string | null;
   };
   bookmarks?: number;
 }
 
 export default function HomeClient() {
   const router = useRouter();
+  const { address: userLocation } = useLocationStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,7 +50,13 @@ export default function HomeClient() {
         });
         const data = await res.json();
         // isBook이 true인 상품만 필터링
-        const books = (data.item || []).filter((item: Product) => item.extra?.isBook);
+        let books = (data.item || []).filter((item: Product) => item.extra?.isBook);
+
+        // 사용자가 위치를 설정한 경우, 같은 동네의 도서만 표시
+        if (userLocation) {
+          books = books.filter((item: Product) => item.extra?.location === userLocation);
+        }
+
         setProducts(books);
       } catch (error) {
         console.error('도서 목록 조회 실패:', error);
@@ -57,7 +66,7 @@ export default function HomeClient() {
     };
 
     fetchProducts();
-  }, []);
+  }, [userLocation]);
 
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {

@@ -118,7 +118,8 @@ export default function LocationPage() {
             const data = await response.json();
             if (data.documents && data.documents.length > 0) {
               const address = data.documents[0].address;
-              const addressName = address.region_3depth_name || address.region_2depth_name;
+              // 구 단위로 저장
+              const addressName = address.region_2depth_name || address.region_3depth_name;
               setCurrentAddress(addressName);
             } else {
               setCurrentAddress('현재 동네');

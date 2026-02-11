@@ -219,7 +219,7 @@ export default function BookDetailPage() {
             {/* 가로 슬라이드 */}
             <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
               {product.mainImages.map((img, idx) => (
-                <div key={idx} className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter">
+                <div key={idx} className="relative shrink-0 w-32 aspect-3/4 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter">
                   <Image
                     src={getImageUrl(img.path)}
                     alt={`${product.name} ${idx + 1}`}

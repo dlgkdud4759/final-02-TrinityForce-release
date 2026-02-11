@@ -8,6 +8,17 @@ import { useRouter } from "next/navigation"
 import { getAxios, handleAxiosError } from "@/utils/axios"
 import { useUserStore } from "@/zustand/useUserStore"
 import LoginModal from "@/components/modals/LoginModal"
+import Script from "next/script"
+
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (config: {
+        oncomplete: (data: { address: string }) => void
+      }) => { open: () => void }
+    }
+  }
+}
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -19,6 +30,10 @@ export default function SignUpPage() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [address, setAddress] = useState('');
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
+const [isNameChecked, setIsNameChecked] = useState(false);
+  
 
   // 이메일 중복 확인
   const handleEmailCheck = async () => {
@@ -45,8 +60,10 @@ export default function SignUpPage() {
 
       if (response.data.ok === 1) {
         alert('사용 가능한 이메일입니다.')
+        setIsEmailChecked(true)
       } else {
         alert('이미 사용 중인 이메일입니다.')
+        setIsEmailChecked(true)
       }
     } catch (error) {
       console.error('이메일 중복 확인 에러:', error)
@@ -80,14 +97,24 @@ export default function SignUpPage() {
 
       if (response.data.ok === 1) {
         alert('사용 가능한 닉네임입니다.')
+        setIsNameChecked(true)
       } else {
         alert('이미 사용 중인 닉네임입니다.')
+        setIsNameChecked(true)
       }
       } catch (error) {
         console.error('닉네임 중복 확인 에러:', error);
         handleAxiosError(error)
       }
     }
+
+    const handleAddressSearch = () => {
+      new window.daum.Postcode({
+        oncomplete: (data: { address: string }) => {
+          setAddress(data.address)
+      }
+    }).open()
+  }
 
 
   // 회원가입
@@ -96,7 +123,7 @@ export default function SignUpPage() {
     const trimmedName = name.trim()
 
     // 1. 빈 값 체크
-    if (!trimmedEmail || !trimmedName || !password || !passwordConfirm) {
+    if (!trimmedEmail || !trimmedName || !password || !passwordConfirm || !address.trim()) {
       alert("모든 항목을 입력해주세요.")
       return
     }
@@ -108,11 +135,21 @@ export default function SignUpPage() {
       return
     }
 
+    if (!isEmailChecked) {
+      alert("이메일 중복확인을 해주세요.")
+    return
+    }
+
     // 3. 닉네임 유효성 체크
     const nameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/
     if (!nameRegex.test(trimmedName)) {
       alert("닉네임은 2~10자, 한글/영문/숫자만 가능합니다.")
       return
+    }
+
+    if (!isNameChecked) {
+      alert("닉네임 중복확인을 해주세요.")
+    return
     }
 
     // 4. 비밀번호 길이
@@ -142,18 +179,28 @@ export default function SignUpPage() {
         email: trimmedEmail,
         password,
         name: trimmedName,
-        type: 'seller'
+        type: 'seller',
+        address: address.trim()
       })
 
       console.log('회원가입 응답:', response.data)
 
       if (response.data.ok) {
-        const userData = response.data.item
+      const loginResponse = await axios.post('/users/login', {
+        email: trimmedEmail,
+        password,
+      })
+
+      console.log('로그인 응답:', loginResponse.data)
+
+      if (loginResponse.data.ok) {
+        const userData = loginResponse.data.item
         setUser(userData, true) //  바로 로그인
 
         alert('회원가입 성공!')
         router.push('/')
-      } else {
+      } 
+    } else {
         alert('회원가입에 실패했습니다.')
       }
       } catch (error) {
@@ -171,6 +218,12 @@ export default function SignUpPage() {
   
   
   return (
+    <>
+    <Script
+        src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+        strategy="afterInteractive"
+      />
+
     <div className="min-h-screen w-full flex items-center justify-center bg-bg-primary">
       <div className="w-full max-w-[400px] py-6">
         
@@ -180,19 +233,21 @@ export default function SignUpPage() {
             alt="동네책장 로고"
             width={117}
             height={117}
-            className="w-20 h-20 md:w-28 md:h-28 mb-4"
+            className="w-20 h-20 md:w-25 md:h-25 mb-1"
           />
         </div>
 
         {/* 입력폼 */}
-        <div className="space-y-5 w-full max-w-[353px] mx-auto">
+        <div className="space-y-4 w-full max-w-[353px] mx-auto">
           {/* 이메일 */}
           <div className="space-y-2">
             <p className="text-sm text-font-dark">이메일</p>
             <div className="w-full">
               <InputWithButton
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value)
+              setIsEmailChecked(false)}}
               type="email"
               placeholder="example@email.com"
               buttonText="중복확인"
@@ -207,7 +262,9 @@ export default function SignUpPage() {
             <div className="w-full">
               <InputWithButton
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value)
+                setIsNameChecked(false)}}
                 placeholder="2~10자, 한글/영문/숫자"
                 buttonText="중복확인"
                 onButtonClick={hadleNameCheck}
@@ -235,6 +292,18 @@ export default function SignUpPage() {
             </div>
           </div>
 
+          {/* 주소 */}
+          <div className="space-y-2">
+              <p className="text-sm text-font-dark">주소</p>
+              <InputWithButton
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="주소 검색 버튼을 눌러주세요"
+                buttonText="검색"
+                onButtonClick={handleAddressSearch}
+              />
+            </div>
+
           {/* 회원가입 버튼 */}
           <button
           type="button"
@@ -261,5 +330,6 @@ export default function SignUpPage() {
       onClose={() => setShowLogin(false)}
       onLoginSuccess={() => router.push('/')} />
     </div>
+    </>
   )
 }

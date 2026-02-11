@@ -3,7 +3,7 @@
 [![동네책장 로고](./public/images/Logo.png)](https://trinityforce.vercel.app/)
 
 ## 동네책장
-### **다 읽은 책, 버리지 마세요! 📚**
+### 다 읽은 책, 버리지 마세요! 📚
 
 읽지 않는 책이 책장에 쌓여만 가고 있나요?
 

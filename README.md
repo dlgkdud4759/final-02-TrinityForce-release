@@ -1,6 +1,6 @@
 # 2조: 삼위일체
 
-[![동네책장 로고](./public/images/Logo.png)]([배포주소](https://trinityforce.vercel.app/))
+[![동네책장 로고](./public/images/og.png)](https://trinityforce.vercel.app/)
 
 First, run the development server:
 

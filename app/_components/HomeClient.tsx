@@ -171,21 +171,24 @@ export default function HomeClient() {
                     fill
                     className="object-cover"
                   />
-                  <button
-                    type="button"
-                    className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                    aria-label="좋아요"
-                    onClick={(e) => handleLikeClick(e, product)}
-                  >
-                    <Heart
-                      size={18}
-                      className={`md:w-5 md:h-5 transition-colors ${
-                        isLiked(product._id)
-                          ? 'text-red-like fill-red-like'
-                          : 'text-font-dark hover:text-red-like hover:fill-red-like'
-                      }`}
-                    />
-                  </button>
+                  {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
+                  {user?._id !== product.seller_id && (
+                    <button
+                      type="button"
+                      className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                      aria-label="좋아요"
+                      onClick={(e) => handleLikeClick(e, product)}
+                    >
+                      <Heart
+                        size={18}
+                        className={`md:w-5 md:h-5 transition-colors ${
+                          isLiked(product._id)
+                            ? 'text-red-like fill-red-like'
+                            : 'text-font-dark hover:text-red-like hover:fill-red-like'
+                        }`}
+                      />
+                    </button>
+                  )}
                 </div>
 
                 {/* 정보 */}

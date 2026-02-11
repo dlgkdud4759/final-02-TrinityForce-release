@@ -195,21 +195,26 @@ export default function BookDetailPage() {
         <div className="flex items-start justify-end">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                aria-label="좋아요"
-                onClick={handleLikeClick}
-                className="flex items-center cursor-pointer group"
-              >
-                <Heart
-                  size={22}
-                  className={`transition-colors ${
-                    isLiked(product._id)
-                      ? 'text-red-like fill-red-like'
-                      : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
-                  }`}
-                />
-              </button>
+              {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
+              {user?._id !== product.seller_id ? (
+                <button
+                  type="button"
+                  aria-label="좋아요"
+                  onClick={handleLikeClick}
+                  className="flex items-center cursor-pointer group"
+                >
+                  <Heart
+                    size={22}
+                    className={`transition-colors ${
+                      isLiked(product._id)
+                        ? 'text-red-like fill-red-like'
+                        : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
+                    }`}
+                  />
+                </button>
+              ) : (
+                <Heart size={22} className="text-gray-medium" />
+              )}
               <span className="text-[16px] font-medium text-gray-medium">
                 {isLiked(product._id)
                   ? (product.bookmarks || 0) + 1

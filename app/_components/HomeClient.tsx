@@ -50,6 +50,13 @@ export default function HomeClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('hasVisited')
+    if (!hasVisited) {
+      localStorage.setItem('hasVisited', 'true')
+      router.push('/splash')
+    }
+  }, [router])
   // 로그인 시 서버에서 북마크 목록 로드
   useEffect(() => {
     if (user?._id) {

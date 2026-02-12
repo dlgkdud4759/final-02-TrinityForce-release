@@ -147,6 +147,7 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
           <ChatTransactionButton
             orderId={activeRoom?._id || 0}
             productId={activeRoom?.resourceId || 0}
+            isOwner={String(activeRoom?.ownerId) !== String(user._id)}
           />
         </div>
       </div>

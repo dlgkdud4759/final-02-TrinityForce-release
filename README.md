@@ -153,10 +153,14 @@
   <br>
   
 ### 로그인&회원가입
+![Image](https://github.com/user-attachments/assets/5dd5cd6c-49ad-49e3-a6ab-500f6e1388fc)
 
 - **로그인 폼:** 이메일/비밀번호 입력 및 유효성 검사
 - **로그인 모달:** 네비게이션 바에서 비로그인 시 접근 제한 페이지 클릭 시 모달 표시
 - **자동 로그인 유지:** localStorage를 통한 로그인 상태 유지
+
+![Image](https://github.com/user-attachments/assets/ce51a712-e7ac-4527-963a-6fea4e3a118f)
+
 - **회원가입 폼:** 이메일/닉네임/비밀번호/주소 입력 및 유효성 검사
 - **중복 확인:** 이메일/닉네임 중복 확인 필수화 (확인 전 가입 불가)
 - **주소 입력:** 다음 주소 API를 통한 주소 검색 및 저장
@@ -176,6 +180,8 @@
   <br>
 
 ### 검색
+
+![Image](https://github.com/user-attachments/assets/dd781870-30c3-4ea9-8cd1-734a2f72d972)
 
 - **도서 검색:** 키워드 기반 도서 검색 기능
 - **카테고리 필터링:** 전체/소설/인문학 등 카테고리별 필터링

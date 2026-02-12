@@ -41,8 +41,8 @@ export default function useChat() {
     }: {
       resourceType: string;
       resourceId: number;
-    }) => {
-      if (!accessToken || !user) return;
+    }): Promise<number | null> => {
+      if (!accessToken || !user) return null;
 
       // 이미 존재하는 방을 선택할 경우 우선 활성화 (빠른 반응성)
       if (resourceType === 'room') {
@@ -67,11 +67,19 @@ export default function useChat() {
         // 4. 소켓 서버에 현재 활성 룸 알림
         if (chatSocket?.connected) {
           chatSocket.emit('setActiveRoomId', targetRoom._id);
+          // window에 chatSocket 저장 (방 나갈 때 사용)
+          if (typeof window !== 'undefined') {
+            window.chatSocket = chatSocket;
+          }
         }
+
+        // 5. 생성/조회된 채팅방 ID 반환
+        return targetRoom._id;
       } catch (err) {
         if (err instanceof Error) {
           console.error('[useChat] 방 입장 실패:', err.message);
         }
+        return null;
       }
     },
     [accessToken, user, setActiveRoomId, setMessages, addRooms, chatSocket]

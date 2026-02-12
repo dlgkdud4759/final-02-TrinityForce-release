@@ -10,7 +10,8 @@ import Button from '@/components/ui/Button';
 import SearchInput from '@/components/common/SearchInput';
 import LoginModal from '@/components/modals/LoginModal';
 import useAuthStatus from '@/utils/useAuthStatus';
-import { useLikeStore } from '@/zustand/useLikeStore';
+import { useMeetupLikeStore } from '@/zustand/useMeetupLikeStore';
+import { useUserStore } from '@/zustand/useUserStore';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -42,9 +43,10 @@ export default function Meetup() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [posts, setPosts] = useState<MeetupPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { likedPosts, toggleLike } = useLikeStore();
+  const { likedPosts, toggleLike } = useMeetupLikeStore();
   const isLoggedIn = useAuthStatus();
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
 
   // API에서 모임 게시글 목록 가져오기
   useEffect(() => {
@@ -191,21 +193,26 @@ export default function Meetup() {
                       {post.content}
                     </p>
                     <div className="flex items-center gap-1 md:gap-2 mt-auto">
-                      <button
-                        type="button"
-                        aria-label="좋아요"
-                        onClick={(e) => handleToggleLike(e, post._id)}
-                        className="flex items-center gap-1 cursor-pointer group"
-                      >
-                        <Heart
-                          size={16}
-                          className={`md:w-5 md:h-5 transition-colors ${
-                            likedPosts.has(post._id)
-                              ? 'text-red-like fill-red-like'
-                              : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
-                          }`}
-                        />
-                      </button>
+                      {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
+                      {user?._id !== post.user._id ? (
+                        <button
+                          type="button"
+                          aria-label="좋아요"
+                          onClick={(e) => handleToggleLike(e, post._id)}
+                          className="flex items-center gap-1 cursor-pointer group"
+                        >
+                          <Heart
+                            size={16}
+                            className={`md:w-5 md:h-5 transition-colors ${
+                              likedPosts.has(post._id)
+                                ? 'text-red-like fill-red-like'
+                                : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
+                            }`}
+                          />
+                        </button>
+                      ) : (
+                        <Heart size={16} className="md:w-5 md:h-5 text-gray-medium" />
+                      )}
                       <span className="text-sm md:text-base text-gray-medium">
                         {likedPosts.has(post._id) ? post.likes + 1 : post.likes}
                       </span>

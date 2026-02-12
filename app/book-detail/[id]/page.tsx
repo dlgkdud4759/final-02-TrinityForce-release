@@ -10,6 +10,7 @@ import LoginModal from '@/components/modals/LoginModal';
 import { useUserStore } from '@/zustand/useUserStore';
 import { useLikeStore } from '@/zustand/useLikeStore';
 import useChat from '@/app/chat/_hooks/useChat';
+import { ApiError } from '@/app/chat/_api/api';
 
 import { saveRecentView } from '@/utils/recentViews';
 import { getUser } from '@/utils/user';
@@ -48,14 +49,31 @@ export default function BookDetailPage() {
   const titleCls = 'text-[22px] font-medium text-font-dark';
   const dividerCls = 'border-t border-gray-lighter';
 
-  const { likedPosts, toggleLike } = useLikeStore();
+  const { isLiked, toggleLike } = useLikeStore();
   const { enterRoom } = useChat();
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  const { isLoggedIn, user } = useUserStore();
+
+  // 좋아요 클릭 핸들러
+  const handleLikeClick = () => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (!product) return;
+
+    toggleLike({
+      _id: product._id,
+      name: product.name,
+      image: product.mainImages?.[0]?.path || '',
+      author: product.extra?.author,
+    });
+  };
 
   const handleChatClick = async () => {
     if (!isLoggedIn) {
@@ -65,12 +83,18 @@ export default function BookDetailPage() {
 
     try {
       // 이 상품에 대한 판매자와의 채팅방 진입 (없으면 자동 생성)
-      await enterRoom({ resourceType: 'product', resourceId: product!._id });
+      const roomId = await enterRoom({ resourceType: 'product', resourceId: product!._id });
 
-      // 채팅 페이지로 이동
-      router.push('/chat');
+      // 채팅방으로 바로 이동
+      if (roomId) {
+        router.push(`/chat/${roomId}`);
+      }
     } catch (error) {
       console.error('채팅방 입장 실패:', error);
+      // 토큰 만료 시 로그인 모달 표시
+      if (error instanceof ApiError && error.status === 401) {
+        setIsLoginModalOpen(true);
+      }
     }
   };
 
@@ -171,23 +195,28 @@ export default function BookDetailPage() {
         <div className="flex items-start justify-end">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                aria-label="좋아요"
-                onClick={() => toggleLike(product._id)}
-                className="flex items-center cursor-pointer group"
-              >
-                <Heart
-                  size={22}
-                  className={`transition-colors ${
-                    likedPosts.has(product._id)
-                      ? 'text-red-like fill-red-like'
-                      : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
-                  }`}
-                />
-              </button>
+              {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
+              {user?._id !== product.seller_id ? (
+                <button
+                  type="button"
+                  aria-label="좋아요"
+                  onClick={handleLikeClick}
+                  className="flex items-center cursor-pointer group"
+                >
+                  <Heart
+                    size={22}
+                    className={`transition-colors ${
+                      isLiked(product._id)
+                        ? 'text-red-like fill-red-like'
+                        : 'text-gray-medium group-hover:text-red-like group-hover:fill-red-like'
+                    }`}
+                  />
+                </button>
+              ) : (
+                <Heart size={22} className="text-gray-medium" />
+              )}
               <span className="text-[16px] font-medium text-gray-medium">
-                {likedPosts.has(product._id)
+                {isLiked(product._id)
                   ? (product.bookmarks || 0) + 1
                   : product.bookmarks || 0}
               </span>
@@ -238,7 +267,7 @@ export default function BookDetailPage() {
               {product.mainImages.map((img, idx) => (
                 <div
                   key={idx}
-                  className="relative shrink-0 w-64 h-40 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter"
+                  className="relative shrink-0 w-32 aspect-3/4 rounded-lg overflow-hidden bg-gray-100 border border-gray-lighter"
                 >
                   <Image
                     src={getImageUrl(img.path)}
@@ -337,16 +366,18 @@ export default function BookDetailPage() {
                 </div>
               </div>
 
-              {/* 채팅하기 버튼 */}
-              <div className="mt-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleChatClick}
-                  className="px-4 py-2 rounded-lg bg-brown-guide text-font-white text-[14px] font-medium hover:opacity-90 transition-opacity"
-                >
-                  채팅하기
-                </button>
-              </div>
+              {/* 채팅하기 버튼 - 본인 글이 아닐 때만 표시 */}
+              {user?._id !== product.seller_id && (
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleChatClick}
+                    className="px-4 py-2 rounded-lg bg-brown-guide text-font-white text-[14px] font-medium hover:opacity-90 transition-opacity"
+                  >
+                    채팅하기
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ export interface User {
   email: string;
   name: string;
   image?: string;
+  address?: string;
 }
 
 // 회원 유형 타입

@@ -7,6 +7,8 @@ import EmptyState from '@/components/ui/EmptyState';
 import { getAxios, handleAxiosError } from '@/utils/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import HeaderSub from '@/components/layout/HeaderSub';
+import { useUserStore } from '@/zustand/useUserStore';
+import { useLocationStore } from '@/zustand/useLocationStore';
 
 type SearchResult = {
   _id: number;
@@ -17,11 +19,13 @@ type SearchResult = {
     author?: string;
     category?: string;
     condition?: string;
+    location?: string | null;
   };
   createdAt: string;
   seller: {
     name: string;
     image?: string;
+    address?: string;
   };
 };
 
@@ -40,6 +44,11 @@ export default function SearchPage() {
     }
     return [];
   });
+
+  // 유저 주소 가져오기 (위치 재설정 주소 우선, 없으면 회원가입 주소)
+  const user = useUserStore((state) => state.user);
+  const locationAddress = useLocationStore((state) => state.address);
+  const userAddress = locationAddress || user?.address;
 
   // 검색 실행
   const handleSearch = useCallback(async (keyword: string, category: string) => {
@@ -67,7 +76,21 @@ export default function SearchPage() {
 
       const response = await axios.get(`/products`, { params });
 
-      setSearchResults(response.data.item || []);
+      let results = response.data.item || [];
+
+      // 위치 필터링 (도서의 extra.location 기준)
+        if (userAddress) {
+          results = results.filter((item: SearchResult) => {
+            const bookLocation = item.extra?.location;
+            if (!bookLocation) return false;
+            // 주소에서 구 정보 추출하여 비교
+            const userGu = userAddress.match(/\S+구/)?.[0];
+            const bookGu = bookLocation.match(/\S+구/)?.[0];
+            return userGu && bookGu && userGu === bookGu;
+          });
+        }
+
+      setSearchResults(results);
 
       // 최근 검색어
       setRecentSearches(prev => {
@@ -85,7 +108,7 @@ export default function SearchPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [userAddress]);
 
   // URL 파라미터로 전달된 검색어 자동 검색
   useEffect(() => {
@@ -118,7 +141,14 @@ export default function SearchPage() {
     <div className="min-h-screen w-full bg-bg-primary">
       <HeaderSub title='검색'
       backUrl='/'/>
-      <div className="px-4 py-6 max-w-md mx-auto">        
+      <div className="px-4 py-6 max-w-md mx-auto">
+        {/* 위치 표시 */}
+        {userAddress && (
+          <div className="mb-4 text-sm text-gray-dark text-center">
+            📍 {userAddress} 기준 검색
+          </div>
+        )}
+        
         {/* 검색창 */}
         <SearchInput
           value={searchQuery}

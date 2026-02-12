@@ -6,6 +6,10 @@ import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SearchInput from '@/components/common/SearchInput';
+import { useUserStore } from '@/zustand/useUserStore';
+import { useLikeStore } from '@/zustand/useLikeStore';
+import { useLocationStore } from '@/zustand/useLocationStore';
+import LoginModal from '@/components/modals/LoginModal';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -27,15 +31,40 @@ interface Product {
     author?: string;
     condition?: string;
     category?: string;
+    location?: string | null;
   };
   bookmarks?: number;
 }
 
 export default function HomeClient() {
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
+  const locationAddress = useLocationStore((state) => state.address);
+  const userAddress = locationAddress || user?.address;
+  const { isLiked, toggleLike } = useLikeStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // 좋아요 클릭 핸들러
+  const handleLikeClick = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // 로그인 체크
+    if (!user) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    toggleLike({
+      _id: product._id,
+      name: product.name,
+      image: product.mainImages?.[0]?.path || '',
+      author: product.extra?.author,
+    });
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,7 +76,20 @@ export default function HomeClient() {
         });
         const data = await res.json();
         // isBook이 true인 상품만 필터링
-        const books = (data.item || []).filter((item: Product) => item.extra?.isBook);
+        let books = (data.item || []).filter((item: Product) => item.extra?.isBook);
+
+        // 로그인한 사용자의 주소와 같은 지역의 도서만 표시
+        if (userAddress) {
+          books = books.filter((item: Product) => {
+            const bookLocation = item.extra?.location;
+            if (!bookLocation) return false;
+            // 주소에서 구 정보 추출하여 비교
+            const userGu = userAddress.match(/\S+구/)?.[0];
+            const bookGu = bookLocation.match(/\S+구/)?.[0];
+            return userGu && bookGu && userGu === bookGu;
+          });
+        }
+
         setProducts(books);
       } catch (error) {
         console.error('도서 목록 조회 실패:', error);
@@ -57,7 +99,7 @@ export default function HomeClient() {
     };
 
     fetchProducts();
-  }, []);
+  }, [userAddress]);
 
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {
@@ -108,12 +150,19 @@ export default function HomeClient() {
             <p className="text-font-dark text-lg">
               {products.length === 0 ? '등록된 도서가 없습니다.' : '검색 결과가 없습니다.'}
             </p>
-            <Link
-              href="/book-registration"
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  setIsLoginModalOpen(true);
+                } else {
+                  router.push('/book-registration');
+                }
+              }}
               className="mt-4 px-4 py-2 bg-brown-accent text-font-white rounded-lg"
             >
               도서 등록하기
-            </Link>
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -131,14 +180,24 @@ export default function HomeClient() {
                     fill
                     className="object-cover"
                   />
-                  <button
-                    type="button"
-                    className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                    aria-label="좋아요"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <Heart size={18} className="md:w-5 md:h-5 text-font-dark" />
-                  </button>
+                  {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
+                  {user?._id !== product.seller_id && (
+                    <button
+                      type="button"
+                      className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                      aria-label="좋아요"
+                      onClick={(e) => handleLikeClick(e, product)}
+                    >
+                      <Heart
+                        size={18}
+                        className={`md:w-5 md:h-5 transition-colors ${
+                          isLiked(product._id)
+                            ? 'text-red-like fill-red-like'
+                            : 'text-font-dark hover:text-red-like hover:fill-red-like'
+                        }`}
+                      />
+                    </button>
+                  )}
                 </div>
 
                 {/* 정보 */}
@@ -158,6 +217,12 @@ export default function HomeClient() {
           </div>
         )}
       </main>
+
+      {/* 로그인 모달 */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 }

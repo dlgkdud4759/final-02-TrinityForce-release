@@ -67,6 +67,10 @@ export default function useChat() {
         // 4. 소켓 서버에 현재 활성 룸 알림
         if (chatSocket?.connected) {
           chatSocket.emit('setActiveRoomId', targetRoom._id);
+          // window에 chatSocket 저장 (방 나갈 때 사용)
+          if (typeof window !== 'undefined') {
+            window.chatSocket = chatSocket;
+          }
         }
 
         // 5. 생성/조회된 채팅방 ID 반환

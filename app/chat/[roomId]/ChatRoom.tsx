@@ -19,6 +19,13 @@ interface ProductData {
   mainImages?: { path: string; name: string }[];
 }
 
+// window 타입 확장 선언
+declare global {
+  interface Window {
+    chatSocket?: import('socket.io-client').Socket;
+  }
+}
+
 export default function ChatRoom({ roomId }: { roomId: string }) {
   console.log(roomId);
   // useChat 훅에서 채팅 관련 상태와 액션들을 가져옴
@@ -56,6 +63,13 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
   useEffect(() => {
     return () => {
       setActiveRoomId(undefined);
+      // 방에서 나갈 때 소켓에도 방 나감 신호 전달
+      if (typeof window !== 'undefined') {
+        const chatSocket = window.chatSocket;
+        if (chatSocket && chatSocket.connected) {
+          chatSocket.emit('setActiveRoomId', undefined);
+        }
+      }
     };
   }, [setActiveRoomId]);
 
@@ -128,11 +142,11 @@ export default function ChatRoom({ roomId }: { roomId: string }) {
               </p>
             </div>
           </article>
-          
+
           {/* 완료 / 후기 버튼 */}
           <ChatTransactionButton
-          orderId={activeRoom?._id || 0}
-          productId={activeRoom?.resourceId || 0}
+            orderId={activeRoom?._id || 0}
+            productId={activeRoom?.resourceId || 0}
           />
         </div>
       </div>

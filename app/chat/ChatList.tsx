@@ -42,12 +42,12 @@ export default function ChatList() {
     <>
       <HeaderSub title="채팅" />
 
-      <main className="fixed top-17.5 left-0 right-0 bottom-0 flex flex-col overflow-hidden bg-white dark:bg-gray-800 z-0">
+      <main className="fixed top-17.5 left-0 right-0 bottom-0 flex flex-col overflow-hidden">
         <div className="flex-1 flex items-stretch h-full min-h-0 overflow-hidden">
           {/* 채팅방 목록 */}
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
             {rooms.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-gray-400 text-center">
+              <div className="flex flex-col items-center justify-center p-8 text-gray-dark text-center">
                 <p className="text-sm">참여 중인 대화가 없습니다.</p>
               </div>
             ) : (

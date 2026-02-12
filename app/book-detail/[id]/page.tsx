@@ -49,7 +49,9 @@ export default function BookDetailPage() {
   const titleCls = 'text-[22px] font-medium text-font-dark';
   const dividerCls = 'border-t border-gray-lighter';
 
-  const { isLiked, toggleLike } = useLikeStore();
+  const { toggleLike, setCurrentUser, loadBookmarksFromServer, likedBooks } = useLikeStore();
+  // likedBooks를 구독해야 상태 변경 시 리렌더링됨
+  const isLiked = (bookId: number) => likedBooks.has(bookId);
   const { enterRoom } = useChat();
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,8 +60,16 @@ export default function BookDetailPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isLoggedIn, user } = useUserStore();
 
+  // 로그인 시 서버에서 북마크 목록 로드
+  useEffect(() => {
+    if (user?._id) {
+      setCurrentUser(user._id);
+      loadBookmarksFromServer();
+    }
+  }, [user?._id, setCurrentUser, loadBookmarksFromServer]);
+
   // 좋아요 클릭 핸들러
-  const handleLikeClick = () => {
+  const handleLikeClick = async () => {
     if (!isLoggedIn) {
       setIsLoginModalOpen(true);
       return;
@@ -67,12 +77,30 @@ export default function BookDetailPage() {
 
     if (!product) return;
 
-    toggleLike({
+    const wasLiked = isLiked(product._id);
+
+    const success = await toggleLike({
       _id: product._id,
       name: product.name,
       image: product.mainImages?.[0]?.path || '',
       author: product.extra?.author,
     });
+
+    if (success) {
+      try {
+        const res = await fetch(`${API_URL}/products/${id}`, {
+          headers: {
+            'client-id': CLIENT_ID || '',
+          },
+        });
+        const data = await res.json();
+        if (res.ok && data.item) {
+          setProduct(data.item);
+        }
+      } catch (error) {
+        console.error('도서 조회 실패:', error);
+      }
+    }
   };
 
   const handleChatClick = async () => {
@@ -117,6 +145,7 @@ export default function BookDetailPage() {
         }
 
         setProduct(data.item);
+        console.log('[BookDetail] product fetched', data.item);
 
         if (data.item) {
           const currentUser = getUser();
@@ -216,9 +245,7 @@ export default function BookDetailPage() {
                 <Heart size={22} className="text-gray-medium" />
               )}
               <span className="text-[16px] font-medium text-gray-medium">
-                {isLiked(product._id)
-                  ? (product.bookmarks || 0) + 1
-                  : product.bookmarks || 0}
+                {product.likes ?? 0}
               </span>
             </div>
             <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">

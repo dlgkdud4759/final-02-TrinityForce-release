@@ -21,7 +21,6 @@ type MeetupPost = {
   content: string;
   image?: { path: string; name?: string; originalname?: string } | string;
   createdAt?: string;
-  likes?: number;
   bookmarks?: number;
   user?: { _id: number; name: string; image?: string };
 };
@@ -34,7 +33,7 @@ const fallbackPost: MeetupPost = {
     '한강 작가의 작품을 함께 읽고 이야기 나누는 모임입니다. 매주 토요일 오후 2시에 모여서 책에 대한 생각을 나눕니다. 함께 책을 읽으며 깊은 대화를 나눠보아요.',
   image: '/images/book1.jpg',
   createdAt: '2025-01-28',
-  likes: 24,
+  bookmarks: 24,
   user: { _id: 1, name: '책벌레' },
 };
 
@@ -82,7 +81,7 @@ export default function MeetupPostDetail() {
   const postId = params?.id;
   const router = useRouter();
   const isLoggedIn = useAuthStatus();
-  const { likedPosts, toggleLike } = useMeetupLikeStore();
+  const { likedPosts, toggleLike, setCurrentUser, loadBookmarksFromServer } = useMeetupLikeStore();
 
   const [post, setPost] = useState<MeetupPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,6 +137,13 @@ export default function MeetupPostDetail() {
       setCurrentUserId(null);
     }
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    setCurrentUser(currentUserId);
+    if (currentUserId) {
+      loadBookmarksFromServer();
+    }
+  }, [currentUserId, setCurrentUser, loadBookmarksFromServer]);
 
   const handleCommentSubmit = async () => {
     if (!isLoggedIn) {
@@ -218,6 +224,21 @@ export default function MeetupPostDetail() {
     }
   };
 
+  const handleToggleLike = async () => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    const result = await toggleLike(displayPost._id);
+    if (result === null) return;
+
+    setPost((prev) => {
+      if (!prev) return prev;
+      const nextCount = Math.max(0, (prev.bookmarks || 0) + (result ? 1 : -1));
+      return { ...prev, bookmarks: nextCount };
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-bg-primary flex items-center justify-center">
@@ -230,9 +251,9 @@ export default function MeetupPostDetail() {
   const shouldShowError = !post && error;
 
   const imageUrl = getImageUrl(displayPost.image);
-  const baseLikeCount = displayPost.likes ?? displayPost.bookmarks ?? 0;
+  const baseLikeCount = displayPost.bookmarks ?? 0;
   const isLiked = likedPosts.has(displayPost._id);
-  const likeCount = isLiked ? baseLikeCount + 1 : baseLikeCount;
+  const likeCount = baseLikeCount + (isLiked && baseLikeCount === 0 ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
@@ -254,12 +275,12 @@ export default function MeetupPostDetail() {
             <div className="flex items-center gap-1 md:gap-2">
               {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
               {currentUserId !== displayPost.user?._id ? (
-                <button
-                  type="button"
-                  aria-label="좋아요"
-                  onClick={() => toggleLike(displayPost._id)}
-                  className="flex items-center gap-1 cursor-pointer group"
-                >
+              <button
+                type="button"
+                aria-label="좋아요"
+                onClick={handleToggleLike}
+                className="flex items-center gap-1 cursor-pointer group"
+              >
                   <Heart
                     size={20}
                     className={`md:w-6 md:h-6 transition-colors ${

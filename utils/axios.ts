@@ -3,6 +3,53 @@ import { getUser, navigateLogin, setUser } from './user';
 
 const API_SERVER = 'https://fesp-api.koyeb.app/market';
 // const API_SERVER = 'http://localhost/market';
+const LOGIN_EMAIL = process.env.NEXT_PUBLIC_LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.NEXT_PUBLIC_LOGIN_PASSWORD;
+const CLIENT_ID = 'febc15-final02-ecad';
+
+const fetchAccessToken = async () => {
+  if (!LOGIN_EMAIL || !LOGIN_PASSWORD) return null;
+
+  const response = await axios.post(
+    `${API_SERVER}/users/login`,
+    {
+      email: LOGIN_EMAIL,
+      password: LOGIN_PASSWORD,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'Client-Id': CLIENT_ID,
+      },
+    }
+  );
+
+  if (!response.data?.ok) {
+    throw new Error(response.data?.message || '로그인에 실패했습니다.');
+  }
+
+  return response.data.item?.token?.accessToken || null;
+};
+
+let isReauthing = false;
+let reauthWaiters: Array<(token: string | null) => void> = [];
+
+const requestReauth = async () => {
+  if (isReauthing) {
+    return new Promise<string | null>((resolve) => reauthWaiters.push(resolve));
+  }
+
+  isReauthing = true;
+  try {
+    const token = await fetchAccessToken();
+    reauthWaiters.forEach((resolve) => resolve(token));
+    reauthWaiters = [];
+    return token;
+  } finally {
+    isReauthing = false;
+  }
+};
 // access token 재발급 URL
 const REFRESH_URL = '/auth/refresh';
 
@@ -22,14 +69,14 @@ export function getAxios(): AxiosInstance {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      'Client-Id': 'febc15-final02-ecad',
+      'Client-Id': CLIENT_ID,
       Authorization: `Bearer ${user?.token?.accessToken}`,
     },
   });
 
   // 요청 인터셉터 추가하기
   instance.interceptors.request.use(
-    (config) => {
+    async (config) => {
       // 요청이 전달되기 전에 필요한 공통 작업 수행
       config.params = {
         // delay: 1000,
@@ -94,6 +141,13 @@ export function getAxios(): AxiosInstance {
           // 갱신된 accessToken으로 재요청
           config.headers.Authorization = `Bearer ${accessToken}`;
           return axios(config);
+        } else if (LOGIN_EMAIL && LOGIN_PASSWORD) {
+          const accessToken = await requestReauth();
+          if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+            return axios(config);
+          }
+          navigateLogin();
         } else {
           // 로그인 안한 경우
           navigateLogin();

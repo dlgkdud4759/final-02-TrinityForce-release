@@ -89,7 +89,7 @@ export default function NavigationBar() {
           >
             <MessageSquareMore size={24} className="md:w-7 md:h-7" />
             {totalUnreadCount > 0 && (
-              <span className="absolute top-1.5 right-0.75 md:w-4.5 md:h-4.5 bg-red-like text-white rounded-full text-[12px] flex items-center justify-center px-1 font-semibold shadow-md z-10">
+              <span className="absolute top-1.5 right-0.75 w-4 h-4 md:w-4.5 md:h-4.5 bg-red-like text-white rounded-full text-[12px] flex items-center justify-center px-1 font-semibold shadow-md z-10">
                 {totalUnreadCount}
               </span>
             )}

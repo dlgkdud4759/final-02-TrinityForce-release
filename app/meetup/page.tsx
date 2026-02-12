@@ -21,7 +21,7 @@ interface MeetupPost {
   title: string;
   content: string;
   image?: { path: string; name: string; originalname: string };
-  likes: number;
+  bookmarks?: number;
   user: { _id: number; name: string; image: string };
   createdAt: string;
 }
@@ -32,7 +32,7 @@ const fallbackPost: MeetupPost = {
   content:
     '한강 작가의 작품을 함께 읽고 이야기 나누는 모임입니다. 매주 토요일 오후 2시에 모여서 책에 대한 생각을 나눕니다.',
   image: { path: '/images/book1.jpg', name: 'book1.jpg', originalname: 'book1.jpg' },
-  likes: 24,
+  bookmarks: 24,
   user: { _id: 1, name: '책벌레', image: '' },
   createdAt: '2025-01-28',
 };
@@ -43,7 +43,7 @@ export default function Meetup() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [posts, setPosts] = useState<MeetupPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { likedPosts, toggleLike } = useMeetupLikeStore();
+  const { likedPosts, toggleLike, setCurrentUser, loadBookmarksFromServer } = useMeetupLikeStore();
   const isLoggedIn = useAuthStatus();
   const router = useRouter();
   const user = useUserStore((state) => state.user);
@@ -68,6 +68,13 @@ export default function Meetup() {
     fetchPosts();
   }, []);
 
+  useEffect(() => {
+    setCurrentUser(user?._id ?? null);
+    if (user?._id) {
+      loadBookmarksFromServer();
+    }
+  }, [user, setCurrentUser, loadBookmarksFromServer]);
+
   // 검색 결과 필터링
   const sourcePosts = posts.length === 0 ? [fallbackPost] : posts;
 
@@ -84,10 +91,23 @@ export default function Meetup() {
     setHasSearched(true);
   };
 
-  const handleToggleLike = (e: React.MouseEvent, postId: number) => {
+  const handleToggleLike = async (e: React.MouseEvent, postId: number) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleLike(postId);
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    const result = await toggleLike(postId);
+    if (result === null) return;
+
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._id === postId
+          ? { ...post, bookmarks: Math.max(0, (post.bookmarks || 0) + (result ? 1 : -1)) }
+          : post
+      )
+    );
   };
 
   const handleRequireLogin = (e: React.MouseEvent, target: string) => {
@@ -214,7 +234,8 @@ export default function Meetup() {
                         <Heart size={16} className="md:w-5 md:h-5 text-gray-medium" />
                       )}
                       <span className="text-sm md:text-base text-gray-medium">
-                        {likedPosts.has(post._id) ? post.likes + 1 : post.likes}
+                        {(post.bookmarks || 0) +
+                          (likedPosts.has(post._id) && (post.bookmarks || 0) === 0 ? 1 : 0)}
                       </span>
                     </div>
                   </div>

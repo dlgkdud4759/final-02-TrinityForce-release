@@ -41,14 +41,26 @@ export default function HomeClient() {
   const user = useUserStore((state) => state.user);
   const locationAddress = useLocationStore((state) => state.address);
   const userAddress = locationAddress || user?.address;
-  const { isLiked, toggleLike } = useLikeStore();
+  const { likedBooks, toggleLike, setCurrentUser, loadBookmarksFromServer } = useLikeStore();
+
+  // likedBooks Map을 구독해야 상태 변경 시 리렌더링됨
+  const isLiked = (bookId: number) => likedBooks.has(bookId);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  // 로그인 시 서버에서 북마크 목록 로드
+  useEffect(() => {
+    if (user?._id) {
+      setCurrentUser(user._id);
+      // 서버에서 최신 북마크 목록 불러오기
+      loadBookmarksFromServer();
+    }
+  }, [user?._id, setCurrentUser, loadBookmarksFromServer]);
+
   // 좋아요 클릭 핸들러
-  const handleLikeClick = (e: React.MouseEvent, product: Product) => {
+  const handleLikeClick = async (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -58,12 +70,23 @@ export default function HomeClient() {
       return;
     }
 
-    toggleLike({
+    const wasLiked = isLiked(product._id);
+
+    const success = await toggleLike({
       _id: product._id,
       name: product.name,
       image: product.mainImages?.[0]?.path || '',
       author: product.extra?.author,
     });
+
+    // 좋아요 성공 시 로컬에서 카운트 업데이트
+    if (success) {
+      setProducts(prev => prev.map(p =>
+        p._id === product._id
+          ? { ...p, bookmarks: Math.max(0, (p.bookmarks || 0) + (wasLiked ? -1 : 1)) }
+          : p
+      ));
+    }
   };
 
   useEffect(() => {
@@ -180,24 +203,31 @@ export default function HomeClient() {
                     fill
                     className="object-cover"
                   />
-                  {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
-                  {user?._id !== product.seller_id && (
-                    <button
-                      type="button"
-                      className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-                      aria-label="좋아요"
-                      onClick={(e) => handleLikeClick(e, product)}
-                    >
-                      <Heart
-                        size={18}
-                        className={`md:w-5 md:h-5 transition-colors ${
-                          isLiked(product._id)
-                            ? 'text-red-like fill-red-like'
-                            : 'text-font-dark hover:text-red-like hover:fill-red-like'
-                        }`}
-                      />
-                    </button>
-                  )}
+                  {/* 좋아요 버튼 및 카운트 */}
+                  <div className="absolute top-3 right-3 flex flex-col items-center gap-1">
+                    {user?._id !== product.seller_id && (
+                      <button
+                        type="button"
+                        className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                        aria-label="좋아요"
+                        onClick={(e) => handleLikeClick(e, product)}
+                      >
+                        <Heart
+                          size={18}
+                          className={`md:w-5 md:h-5 transition-colors ${
+                            isLiked(product._id)
+                              ? 'text-red-like fill-red-like'
+                              : 'text-font-dark hover:text-red-like hover:fill-red-like'
+                          }`}
+                        />
+                      </button>
+                    )}
+                    {(product.bookmarks ?? 0) > 0 && (
+                      <span className="text-xs text-font-dark bg-white px-1.5 py-0.5 rounded-full">
+                        {product.bookmarks}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* 정보 */}

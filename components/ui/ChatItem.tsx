@@ -27,7 +27,7 @@ export default function ChatItem({
     (m) => String(m._id) !== String(currentUser?._id)
   );
   const displayName = partner?.name || '알 수 없는 사용자';
-  const displayImage = partner?.image || '/images/favicon.svg';
+  const displayImage = partner?.image;
 
   // 마지막 메시지 정보
   const lastMessage = room.lastMessage;
@@ -41,7 +41,14 @@ export default function ChatItem({
   // 마지막 메시지 내용 렌더링 함수
   const renderLastMessage = () => {
     if (!lastMessage) return '새로운 채팅방이 생성되었습니다.';
-    return lastMessage.content || '새로운 메시지가 있습니다.';
+    const content = lastMessage.content || '';
+    // 이미지 태그가 포함되어 있으면 대체 문구 반환
+    if (/<img\s/i.test(content)) {
+      return '사진을 보냈습니다.';
+    }
+    // 기타 태그가 있으면 태그 제거 후 텍스트만 반환
+    const textOnly = content.replace(/<[^>]+>/g, '').trim();
+    return textOnly || '새로운 메시지가 있습니다.';
   };
 
   // 채팅방 나가기 클릭 핸들러 (부모로 이벤트 전달)
@@ -59,13 +66,19 @@ export default function ChatItem({
       }}
     >
       <article className="flex items-center mx-4 my-3">
-        <Image
-          className="shrink-0 w-10.5 h-10.5 rounded-lg bg-border-primary"
-          alt={`${displayName} 프로필`}
-          src={displayImage}
-          width={42}
-          height={42}
-        />
+        {displayImage ? (
+          <Image
+            className="shrink-0 w-10.5 h-10.5 rounded-lg bg-border-primary"
+            alt={`${displayName} 프로필`}
+            src={displayImage}
+            width={42}
+            height={42}
+          />
+        ) : (
+          <span className="flex justify-center items-center w-10.5 h-10.5 rounded-lg text-2xl font-bold text-white bg-brown-guide">
+            {displayName?.[0] || '?'}
+          </span>
+        )}
         <div className="flex flex-col gap-0.5 h-9.5 ml-2 flex-1 min-w-0">
           <h3 className="h-5 text-mg font-semibold text-font-dark">
             {displayName}
@@ -76,7 +89,7 @@ export default function ChatItem({
         </div>
         {room.unreadCount ? (
           <div className="ml-3 shrink-0">
-            <span className="inline-flex items-center justify-center bg-red-like text-white rounded-full w-6 h-6 text-xs font-semibold">
+            <span className="inline-flex items-center justify-center bg-red-like/90 text-white rounded-full w-6 h-6 text-xs font-semibold">
               {room.unreadCount}
             </span>
           </div>

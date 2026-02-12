@@ -5,6 +5,7 @@ import { CompleteIcon } from '@/app/components/icons/Complete';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { getAxios } from '@/utils/axios';
+import toast from 'react-hot-toast'
 
 type Props = {
   orderId: number
@@ -37,7 +38,7 @@ export default function ChatTransactionButton({ orderId, productId, isOwner }: P
     console.log('교환 완료!')
   } catch (error) {
     console.error('교환 완료 에러:', error)
-    alert('교환 완료 처리에 실패했습니다.')
+    toast.error('교환 완료 처리에 실패했습니다.')
   }
 }
 

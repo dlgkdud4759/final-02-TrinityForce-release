@@ -7,6 +7,7 @@ import EmptyState from "@/components/ui/EmptyState"
 import HeaderSub from "@/components/layout/HeaderSub"
 import { getRecentViews, clearRecentViews } from "@/utils/recentViews"
 import { getUser } from "@/utils/user"
+import toast from "react-hot-toast"
 
 type RecentView = {
   id: number
@@ -28,12 +29,11 @@ export default function RecentPage() {
     return []
   })
 
-  const handleClearAll = () => {
-    if (confirm('최근 본 글을 모두 삭제하시겠습니까?')) {
-      clearRecentViews(currentUser?._id)
-      setRecents([])
-    }
-  }
+const handleClearAll = () => {
+  clearRecentViews(currentUser?._id)
+  setRecents([])
+  toast.success('최근 본 글을 모두 삭제했습니다.')
+}
 
   const isEmpty = recents.length === 0
 

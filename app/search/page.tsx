@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import HeaderSub from '@/components/layout/HeaderSub';
 import { useUserStore } from '@/zustand/useUserStore';
 import { useLocationStore } from '@/zustand/useLocationStore';
+import toast from 'react-hot-toast'
 
 type SearchResult = {
   _id: number;
@@ -53,7 +54,7 @@ export default function SearchPage() {
   // 검색 실행
   const handleSearch = useCallback(async (keyword: string, category: string) => {
     if (!keyword.trim()) {
-      alert('검색어를 입력해주세요.')
+      toast.error('검색어를 입력해주세요.')
       return
     }
 

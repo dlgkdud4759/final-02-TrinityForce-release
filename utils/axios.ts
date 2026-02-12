@@ -1,5 +1,6 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { getUser, navigateLogin, setUser } from './user';
+import toast from 'react-hot-toast'
 
 const API_SERVER = 'https://fesp-api.koyeb.app/market';
 // const API_SERVER = 'http://localhost/market';
@@ -172,8 +173,8 @@ export function getAxios(): AxiosInstance {
  */
 export function handleAxiosError(err: unknown) {
   if (err instanceof AxiosError) {
-    alert(err.response?.data.message || err.message);
+    toast.error(err.response?.data.message || err.message);
   } else {
-    alert((err as Error).message);
+    toast.error((err as Error).message);
   }
 }

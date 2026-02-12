@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useUserStore } from '@/zustand/useUserStore';
 import { useLikeStore } from '@/zustand/useLikeStore';
 import Script from 'next/script';
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
   children,
@@ -35,6 +36,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <Toaster position="top-center" />
         <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>

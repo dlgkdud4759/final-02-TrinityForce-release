@@ -15,10 +15,6 @@ export default function Chatting({
   isMine,
   sender,
 }: MessageBubbleProps) {
-  // 본인 메시지면 currentUser의 이미지, 상대방 메시지면 sender의 이미지
-  const avatarSrc =
-    !isMine && sender?.image ? sender.image : '/images/Logo.png';
-
   const wrapperCls = isMine ? 'flex-row-reverse mr-2' : 'flex';
   const bubbleCls = isMine
     ? 'rounded-tl-xl rounded-b-xl bg-brown-accent text-white'
@@ -58,15 +54,20 @@ export default function Chatting({
   return (
     <>
       <article className={`flex ${wrapperCls}`}>
-        {!isMine && (
-          <Image
-            className="w-10 h-10 m-2 bg-border-primary rounded-md"
-            alt="사용자 프로필"
-            src={avatarSrc}
-            width={40}
-            height={40}
-          />
-        )}
+        {!isMine &&
+          (sender?.image ? (
+            <Image
+              className="w-10 h-10 m-2 bg-border-primary rounded-md"
+              alt="사용자 프로필"
+              src={sender.image}
+              width={40}
+              height={40}
+            />
+          ) : (
+            <span className="w-10 h-10 m-2 flex items-center justify-center rounded-md bg-brown-guide text-2xl font-bold text-white">
+              {sender?.name?.[0] || '?'}
+            </span>
+          ))}
 
         <div className="flex gap-2 items-end">
           {/* 내 메시지면 앞에, 상대 메시지면 뒤에 렌더링 용도 */}
@@ -82,11 +83,16 @@ export default function Chatting({
           ) : null}
 
           <div className="flex gap-1 items-center pt-3.5">
-            <div className={bubbleCls}>
-              <div className="text-sm font-bold mx-2 my-1">
-                {sanitizeAndRenderHTML(message.content)}
+            {/* 이미지 메시지라면 말풍선 없이 출력 */}
+            {/<img\s/i.test(message.content || '') ? (
+              <div>{sanitizeAndRenderHTML(message.content)}</div>
+            ) : (
+              <div className={bubbleCls}>
+                <div className="text-sm font-bold mx-2 my-1">
+                  {sanitizeAndRenderHTML(message.content)}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {!isMine ? (

@@ -14,6 +14,7 @@ import { ApiError } from '@/app/chat/_api/api';
 
 import { saveRecentView } from '@/utils/recentViews';
 import { getUser } from '@/utils/user';
+import { showSimpleToast } from '@/utils/simpleToast';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID;
@@ -111,10 +112,14 @@ export default function BookDetailPage() {
 
     try {
       // 이 상품에 대한 판매자와의 채팅방 진입 (없으면 자동 생성)
-      const roomId = await enterRoom({ resourceType: 'product', resourceId: product!._id });
+      const roomId = await enterRoom({
+        resourceType: 'product',
+        resourceId: product!._id,
+      });
 
       // 채팅방으로 바로 이동
       if (roomId) {
+        showSimpleToast('채팅방에 입장했습니다.');
         router.push(`/chat/${roomId}`);
       }
     } catch (error) {

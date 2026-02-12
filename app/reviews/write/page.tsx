@@ -6,6 +6,8 @@ import { StarIcon } from '@/app/components/icons/Star';
 import { SquareCheckboxIcon } from '@/app/components/icons/SquareCheckbox';
 import { getAxios, handleAxiosError } from '@/utils/axios';
 import HeaderSub from '@/components/layout/HeaderSub';
+import toast from 'react-hot-toast';
+
 
 export default function ReviewWritePage() {
   const router = useRouter();
@@ -24,7 +26,7 @@ export default function ReviewWritePage() {
     if (orderId) {
       const written = localStorage.getItem(`review_${orderId}`)
       if (written) {
-        alert('이미 작성한 후기입니다.')
+        toast('이미 작성한 후기입니다.')
         router.push('/user/reviews')
       }
     }
@@ -63,15 +65,15 @@ export default function ReviewWritePage() {
   const handleSubmit = async () => {
     // 유효성 검사
     if (!orderId || !productId) {
-      alert('잘못된 접근입니다.');
+      toast.error('잘못된 접근입니다.')
       return;
     }
     if (rating === 0) {
-      alert('별점을 선택해주세요.');
+      toast.error('별점을 선택해주세요.')
       return;
     }
     if (!selectedOption) {
-      alert('후기를 선택해주세요.');
+      toast.error('후기를 선택해주세요.')
       return;
     }
 
@@ -94,10 +96,10 @@ export default function ReviewWritePage() {
 
       if (response.data.ok) {
         localStorage.setItem(`review_${orderId}`, 'true')
-        alert('후기가 등록되었습니다!');
+        toast.success('후기가 등록되었습니다!')
         router.push('/user/reviews'); // 후기 목록으로 이동
       } else {
-        alert('후기 등록에 실패했습니다.');
+        toast.error('후기 등록에 실패했습니다.')
       }
     } catch (error) {
       console.error('후기 등록 에러:', error);

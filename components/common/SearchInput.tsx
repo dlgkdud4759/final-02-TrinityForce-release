@@ -21,7 +21,7 @@ export default function SearchInput({
   onFocus,
   onBlur,
   placeholder = "검색어를 입력하세요",
-  categories = ["전체", "소설", "시/에세이", "자기계발", "요리", "만화", "아동"],
+  categories = ["전체", "과학", "인문학", "사회과학", "예술", "수험서", "자기계발", "소설", "참고서", "어린이"],
   showCategory = true
 }: SearchInputProps) {
   const [selectedCategory, setSelectedCategory] = useState(categories[0])

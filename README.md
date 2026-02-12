@@ -126,7 +126,7 @@
 <hr>
 
 ### 메인 홈
-![Image](https://github.com/user-attachments/assets/a42a1592-3ee0-41fb-a7c5-625ba903f796)
+![Image](https://github.com/user-attachments/assets/86d1bca9-108a-406a-9f7e-dc690f32769b)
 
 - **헤더:** 로고 메인페이지 이동 / 위치 재설정 기능 / 알림 목록
 - **북마크:** 좋아요 버튼 / 내정보의 관심 목록으로 연결<br>
@@ -165,7 +165,7 @@
   <br>
 
 ### 도서 상세페이지
-![Image](https://github.com/user-attachments/assets/9e314819-5dcd-4aa8-87ae-b24f016dc434)
+![Image](https://github.com/user-attachments/assets/6a232c0e-92df-459a-9e49-1248733dae9f)
 
 - **헤더:** 뒤로가기 버튼 / 페이지 제목
 - **북마크:** 좋아요 버튼 / 내정보의 관심 목록으로 연결
@@ -190,7 +190,7 @@
   <br>
 
 ### 모임 게시판
-![Image](https://github.com/user-attachments/assets/2b2052fe-a76a-40b9-bcc0-8970486ebf5f)
+![Image](https://github.com/user-attachments/assets/681d3cff-63dd-4d52-80bc-79f879bc363e)
 
 - **헤더:** 뒤로가기 버튼 / 페이지 제목
 - **모임 생성:** 모임 생성 버튼 (로그인 필요)
@@ -200,7 +200,7 @@
   <br>
 
 ### 모임 게시물 상세 페이지
-![Image](https://github.com/user-attachments/assets/e697628f-cd77-44a7-bfa7-30e54cf7c7b3)
+![Image](https://github.com/user-attachments/assets/721de29f-194b-46bc-a712-8ad43321ef28)
 
 - **헤더:** 뒤로가기 버튼 / 페이지 제목
 - **게시글 정보:** 제목 / 작성자 / 작성일시 / 이미지 / 상세 내용
@@ -210,7 +210,7 @@
   <br>
 
 ### 모임 게시물 작성
-![Image](https://github.com/user-attachments/assets/e697628f-cd77-44a7-bfa7-30e54cf7c7b3)
+![Image](https://github.com/user-attachments/assets/b94e8e72-7d47-4e1a-923a-fff09042619d)
 
 - **헤더:** 뒤로가기 버튼 / 페이지 제목
 - **사진:** 이미지 업로드 / 미리보기 / 삭제 기능
@@ -221,7 +221,7 @@
   <br>
 
 ### 도서 등록 페이지
-![Image](https://github.com/user-attachments/assets/6fba9ad2-6a4c-4988-b180-622aaebe908c)
+![Image](https://github.com/user-attachments/assets/75955850-40a3-48de-a396-5a05255a1939)
 
 - **헤더:** 뒤로가기 버튼 / 페이지 제목
 - **도서 이미지:** 최대 12장 다중 이미지 업로드 / 미리보기 / 삭제 기능

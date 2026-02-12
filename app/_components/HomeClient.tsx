@@ -41,11 +41,18 @@ export default function HomeClient() {
   const user = useUserStore((state) => state.user);
   const locationAddress = useLocationStore((state) => state.address);
   const userAddress = locationAddress || user?.address;
-  const { isLiked, toggleLike } = useLikeStore();
+  const { isLiked, toggleLike, setCurrentUser } = useLikeStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // 로그인 시 좋아요 목록 로드
+  useEffect(() => {
+    if (user?._id) {
+      setCurrentUser(user._id);
+    }
+  }, [user?._id, setCurrentUser]);
 
   // 좋아요 클릭 핸들러
   const handleLikeClick = (e: React.MouseEvent, product: Product) => {

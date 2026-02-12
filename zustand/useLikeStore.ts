@@ -56,7 +56,7 @@ export const useLikeStore = create<LikeStore>((set, get) => ({
 
   toggleLike: (book) => {
     const { currentUserId, likedBooks } = get();
-    if (currentUserId === null) return; // 로그인 필요
+    if (currentUserId === null) return;
 
     const next = new Map(likedBooks);
 

@@ -2,6 +2,7 @@
 
 import { ChatRoomState } from '@/app/chat/_types/chat';
 import { useUserStore } from '@/zustand/useUserStore';
+import useChatStore from '@/app/chat/_zustand/chatStore';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -19,6 +20,7 @@ export default function ChatItem({
   onLeave,
 }: ChatRoomItemProps) {
   const { user: currentUser } = useUserStore();
+  const { setActiveRoomId } = useChatStore();
 
   // 현재 로그인한 사용자를 제외한 상대방 정보 추출
   const partner = room.members.find(
@@ -49,7 +51,13 @@ export default function ChatItem({
   // };
 
   return (
-    <Link href={`/chat/${room._id}`}>
+    <Link
+      href={`/chat/${room._id}`}
+      onClick={() => {
+        // 즉시 활성화 처리하여 UI에서 언리드 카운트 제거
+        setActiveRoomId(room._id);
+      }}
+    >
       <article className="flex items-center mx-4 my-3">
         <Image
           className="shrink-0 w-10.5 h-10.5 rounded-lg bg-border-primary"
@@ -66,6 +74,13 @@ export default function ChatItem({
             {renderLastMessage()}
           </p>
         </div>
+        {room.unreadCount ? (
+          <div className="ml-3 shrink-0">
+            <span className="inline-flex items-center justify-center bg-red-like text-white rounded-full w-6 h-6 text-xs font-semibold">
+              {room.unreadCount}
+            </span>
+          </div>
+        ) : null}
       </article>
     </Link>
   );

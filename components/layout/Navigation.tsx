@@ -6,11 +6,13 @@ import { House, Users, FilePlus, MessageSquareMore, User } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRequireAuth } from '@/app/hooks/useRequireAuth';
 import LoginModal from '@/components/modals/LoginModal';
+import useChat from '@/app/chat/_hooks/useChat';
 
 export default function NavigationBar() {
   const router = useRouter();
   const pathname = usePathname();
   const { showLogin, setShowLogin, checkAuth } = useRequireAuth();
+  const { totalUnreadCount } = useChat();
 
   if (pathname.startsWith('/chat/')) {
     return null;
@@ -83,8 +85,14 @@ export default function NavigationBar() {
             onClick={goToChat}
             className={getNavClass('/chat')}
             aria-label="채팅"
+            style={{ position: 'relative' }}
           >
             <MessageSquareMore size={24} className="md:w-7 md:h-7" />
+            {totalUnreadCount > 0 && (
+              <span className="absolute top-1.5 right-0.75 md:w-4.5 md:h-4.5 bg-red-like text-white rounded-full text-[12px] flex items-center justify-center px-1 font-semibold shadow-md z-10">
+                {totalUnreadCount}
+              </span>
+            )}
           </button>
 
           {/* 마이페이지 버튼 */}

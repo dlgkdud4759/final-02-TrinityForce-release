@@ -33,6 +33,7 @@ interface ProductData {
     image?: string;
   };
   bookmarks?: number;
+  likes?: number;
   extra?: {
     isBook?: boolean;
     author?: string;
@@ -250,7 +251,7 @@ export default function BookDetailPage() {
                 <Heart size={22} className="text-gray-medium" />
               )}
               <span className="text-[16px] font-medium text-gray-medium">
-                {product.bookmarks ?? 0}
+                {product.likes ?? 0}
               </span>
             </div>
             <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">

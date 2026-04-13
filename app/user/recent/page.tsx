@@ -1,41 +1,51 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import EmptyState from "@/components/ui/EmptyState"
-import HeaderSub from "@/components/layout/HeaderSub"
-import { getRecentViews, clearRecentViews } from "@/utils/recentViews"
-import { getUser } from "@/utils/user"
-import toast from "react-hot-toast"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import EmptyState from '@/components/ui/EmptyState';
+import HeaderSub from '@/components/layout/HeaderSub';
+import { getRecentViews, clearRecentViews } from '@/utils/recentViews';
+import { getUser } from '@/utils/user';
+import toast from 'react-hot-toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const getImageUrl = (imagePath?: string) => {
+  if (!imagePath) return '/favicon.ico';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${API_URL ?? ''}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 type RecentView = {
-  id: number
-  name: string
-  image: string
-  content?: string
-  author?: string
-  viewedAt: string
-}
+  id: number;
+  name: string;
+  image: string;
+  content?: string;
+  author?: string;
+  viewedAt: string;
+};
 
 export default function RecentPage() {
-  const router = useRouter()
-  const currentUser = getUser()
-  
+  const router = useRouter();
+  const currentUser = getUser();
+
   const [recents, setRecents] = useState<RecentView[]>(() => {
     if (typeof window !== 'undefined') {
-      return getRecentViews(currentUser?._id)
+      return getRecentViews(currentUser?._id);
     }
-    return []
-  })
+    return [];
+  });
 
-const handleClearAll = () => {
-  clearRecentViews(currentUser?._id)
-  setRecents([])
-  toast.success('최근 본 글을 모두 삭제했습니다.')
-}
+  const handleClearAll = () => {
+    if (confirm('최근 본 글을 모두 삭제하시겠습니까?')) {
+      clearRecentViews(currentUser?._id);
+      setRecents([]);
+      toast.success('최근 본 글을 모두 삭제했습니다.');
+    }
+  };
 
-  const isEmpty = recents.length === 0
+  const isEmpty = recents.length === 0;
 
   return (
     <div className="min-h-screen w-full bg-bg-primary">
@@ -55,7 +65,7 @@ const handleClearAll = () => {
 
         {/* 빈 상태 */}
         {isEmpty ? (
-          <EmptyState 
+          <EmptyState
             title="아직 둘러본 책이 없어요."
             description="동네 책장을 구경해보세요!"
           />
@@ -65,18 +75,17 @@ const handleClearAll = () => {
             {recents.map((item, index) => (
               <div key={item.id}>
                 {/* 목록 아이템 */}
-                <div 
+                <div
                   className="flex gap-4 py-4 cursor-pointer hover:bg-gray-50 transition rounded-lg px-2"
                   onClick={() => router.push(`/book-detail/${item.id}`)}
                 >
                   {/* 책 이미지 */}
-                  <div className="w-18 h-18 flex-shrink-0">
+                  <div className="w-18 h-18 shrink-0">
                     <Image
-                      src={item.image || '/favicon.ico'}
+                      src={getImageUrl(item.image)}
                       alt={item.name}
                       width={64}
                       height={80}
-                      unoptimized
                       className="w-full h-full object-cover rounded"
                     />
                   </div>
@@ -96,9 +105,7 @@ const handleClearAll = () => {
                         {item.content}
                       </p>
                     )}
-                    <p className="text-xs text-gray-dark">
-                      {item.viewedAt}
-                    </p>
+                    <p className="text-xs text-gray-dark">{item.viewedAt}</p>
                   </div>
                 </div>
 
@@ -112,5 +119,5 @@ const handleClearAll = () => {
         )}
       </div>
     </div>
-  )
+  );
 }

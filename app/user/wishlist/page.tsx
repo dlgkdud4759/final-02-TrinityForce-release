@@ -24,7 +24,10 @@ export default function WishlistPage() {
   };
 
   // 좋아요 취소 핸들러
-  const handleUnlike = (e: React.MouseEvent, book: { _id: number; name: string; image: string; author?: string }) => {
+  const handleUnlike = (
+    e: React.MouseEvent,
+    book: { _id: number; name: string; image: string; author?: string }
+  ) => {
     e.stopPropagation();
     toggleLike(book);
   };
@@ -50,13 +53,12 @@ export default function WishlistPage() {
                   onClick={() => router.push(`/book-detail/${book._id}`)}
                 >
                   {/* 책 이미지 */}
-                  <div className="w-18 h-24 flex-shrink-0">
+                  <div className="w-18 h-24 shrink-0">
                     <Image
                       src={getImageUrl(book.image)}
                       alt={book.name}
                       width={72}
                       height={96}
-                      unoptimized
                       className="w-full h-full object-cover rounded"
                     />
                   </div>
@@ -71,9 +73,7 @@ export default function WishlistPage() {
                         {book.author}
                       </p>
                     )}
-                    <p className="text-xs text-gray-dark">
-                      {book.likedAt}
-                    </p>
+                    <p className="text-xs text-gray-dark">{book.likedAt}</p>
                   </div>
 
                   {/* 좋아요 버튼 */}

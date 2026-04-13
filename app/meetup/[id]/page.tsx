@@ -100,7 +100,9 @@ export default function MeetupPostDetail() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        throw new Error(data.message || '모임 게시글을 불러오는데 실패했습니다.');
+        throw new Error(
+          data.message || '모임 게시글을 불러오는데 실패했습니다.'
+        );
       }
 
       if (data.item?.type && data.item.type !== 'meetup') {
@@ -212,7 +214,9 @@ export default function MeetupPostDetail() {
 
     try {
       const axios = getAxios();
-      const response = await axios.delete(`/posts/${postId}/replies/${commentId}`);
+      const response = await axios.delete(
+        `/posts/${postId}/replies/${commentId}`
+      );
       if (response.data?.ok) {
         setComments((prev) => prev.filter((c) => c._id !== commentId));
         return;
@@ -293,7 +297,9 @@ export default function MeetupPostDetail() {
               ) : (
                 <Heart size={20} className="md:w-6 md:h-6 text-gray-dark" />
               )}
-              <span className="text-sm md:text-base text-gray-dark">{likeCount}</span>
+              <span className="text-sm md:text-base text-gray-dark">
+                {likeCount}
+              </span>
             </div>
             <p className="text-[12px] md:text-[14px] text-gray-dark mt-1">
               {formatDate(displayPost.createdAt)}
@@ -326,7 +332,9 @@ export default function MeetupPostDetail() {
 
       {/* 설명글 */}
       <div className="px-4 pb-4 md:px-6 md:pb-6 max-w-6xl mx-auto">
-        <p className="text-sm md:text-base text-font-dark leading-relaxed">{displayPost.content}</p>
+        <p className="text-sm md:text-base text-font-dark leading-relaxed">
+          {displayPost.content}
+        </p>
       </div>
 
       {/* 구분선 */}
@@ -334,8 +342,12 @@ export default function MeetupPostDetail() {
 
       {/* 댓글 헤더 */}
       <div className="px-4 py-4 md:px-6 md:py-6 max-w-6xl mx-auto flex items-center gap-2">
-        <span className="text-[22px] md:text-[26px] font-medium text-font-dark">댓글</span>
-        <span className="text-[14px] md:text-[16px] font-normal text-gray-dark">{comments.length}</span>
+        <span className="text-[22px] md:text-[26px] font-medium text-font-dark">
+          댓글
+        </span>
+        <span className="text-[14px] md:text-[16px] font-normal text-gray-dark">
+          {comments.length}
+        </span>
       </div>
 
       {/* 구분선 */}
@@ -360,7 +372,6 @@ export default function MeetupPostDetail() {
                         alt={comment.user?.name || '사용자'}
                         fill
                         className="object-cover"
-                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-500 text-lg font-bold">
@@ -374,18 +385,21 @@ export default function MeetupPostDetail() {
                     <p className="text-sm md:text-base font-semibold text-font-dark mb-1">
                       {comment.user?.name || '알 수 없음'}
                     </p>
-                    <p className="text-sm md:text-base text-font-dark">{comment.content}</p>
-                    {comment.user?._id && comment.user._id === currentUserId && (
-                      <div className="flex justify-end mt-2">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteComment(comment._id)}
-                          className="text-[12px] md:text-[14px] text-gray-dark hover:text-brown-accent transition-colors cursor-pointer"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    )}
+                    <p className="text-sm md:text-base text-font-dark">
+                      {comment.content}
+                    </p>
+                    {comment.user?._id &&
+                      comment.user._id === currentUserId && (
+                        <div className="flex justify-end mt-2">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="text-[12px] md:text-[14px] text-gray-dark hover:text-brown-accent transition-colors cursor-pointer"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -420,11 +434,13 @@ export default function MeetupPostDetail() {
         </div>
 
         {/* 글 삭제 버튼 (내 글일 때만) */}
-      {post && displayPost.user?._id && displayPost.user._id === currentUserId && (
-        <div className="flex justify-center mt-4 md:mt-6">
-          <Button text="글 삭제" onClick={handleDeletePost} />
-        </div>
-      )}
+        {post &&
+          displayPost.user?._id &&
+          displayPost.user._id === currentUserId && (
+            <div className="flex justify-center mt-4 md:mt-6">
+              <Button text="글 삭제" onClick={handleDeletePost} />
+            </div>
+          )}
       </div>
 
       <LoginModal

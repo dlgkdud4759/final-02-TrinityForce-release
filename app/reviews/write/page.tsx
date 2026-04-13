@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { StarIcon } from '@/app/components/icons/Star';
 import { SquareCheckboxIcon } from '@/app/components/icons/SquareCheckbox';
 import { getAxios, handleAxiosError } from '@/utils/axios';
 import HeaderSub from '@/components/layout/HeaderSub';
+import toast from 'react-hot-toast';
+
 
 export default function ReviewWritePage() {
   const router = useRouter();
@@ -18,6 +20,17 @@ export default function ReviewWritePage() {
   const [rating, setRating] = useState(0);
   const [selectedOption, setSelectedOption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // 이미 작성한 후기인지 확인
+   useEffect(() => {
+    if (orderId) {
+      const written = localStorage.getItem(`review_${orderId}`)
+      if (written) {
+        toast('이미 작성한 후기입니다.')
+        router.push('/user/reviews')
+      }
+    }
+  }, [orderId, router])
 
   // 별점에 따른 옵션 목록
   const getOptions = () => {
@@ -52,15 +65,15 @@ export default function ReviewWritePage() {
   const handleSubmit = async () => {
     // 유효성 검사
     if (!orderId || !productId) {
-      alert('잘못된 접근입니다.');
+      toast.error('잘못된 접근입니다.')
       return;
     }
     if (rating === 0) {
-      alert('별점을 선택해주세요.');
+      toast.error('별점을 선택해주세요.')
       return;
     }
     if (!selectedOption) {
-      alert('후기를 선택해주세요.');
+      toast.error('후기를 선택해주세요.')
       return;
     }
 
@@ -82,10 +95,11 @@ export default function ReviewWritePage() {
       console.log('후기 등록 응답:', response.data);
 
       if (response.data.ok) {
-        alert('후기가 등록되었습니다!');
+        localStorage.setItem(`review_${orderId}`, 'true')
+        toast.success('후기가 등록되었습니다!')
         router.push('/user/reviews'); // 후기 목록으로 이동
       } else {
-        alert('후기 등록에 실패했습니다.');
+        toast.error('후기 등록에 실패했습니다.')
       }
     } catch (error) {
       console.error('후기 등록 에러:', error);

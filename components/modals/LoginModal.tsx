@@ -11,6 +11,7 @@ import { GoogleIcon } from '@/app/components/icons/Google';
 import { getAxios, handleAxiosError } from '@/utils/axios';
 import type { UserDetail } from '@/types/user';
 import { useUserStore } from '@/zustand/useUserStore';
+import toast from 'react-hot-toast'
 
 type LoginModalProps = {
   isOpen: boolean;
@@ -20,8 +21,8 @@ type LoginModalProps = {
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('test@test.com');
+  const [password, setPassword] = useState('1234567a');
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const setUser = useUserStore((state) => state.setUser);
@@ -30,7 +31,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
   const handleLogin = async () => {
     // 유효성 검사
     if (!email || !password) {
-      alert('이메일과 비밀번호를 입력해주세요.');
+      toast.error('이메일과 비밀번호를 입력해주세요.')
       return;
     }
 
@@ -51,7 +52,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
         setUser(userData, keepLoggedIn);
 
-        alert('로그인 성공!');
+        toast.success('로그인 성공!')
         onClose();
 
         if (onLoginSuccess) {
@@ -59,7 +60,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
         }
 
       } else {
-        alert('로그인에 실패했습니다.');
+        toast.error('로그인에 실패했습니다.')
       }
       }  catch (error) {
         console.error('로그인 에러', error);

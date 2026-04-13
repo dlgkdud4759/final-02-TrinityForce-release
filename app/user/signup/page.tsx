@@ -9,6 +9,7 @@ import { getAxios, handleAxiosError } from "@/utils/axios"
 import { useUserStore } from "@/zustand/useUserStore"
 import LoginModal from "@/components/modals/LoginModal"
 import Script from "next/script"
+import toast from 'react-hot-toast'
 
 declare global {
   interface Window {
@@ -41,14 +42,14 @@ const [isNameChecked, setIsNameChecked] = useState(false);
 
     // 빈 값일 때
     if (!trimmedEmail) {
-      alert('이메일을 입력해주세요.')
+      toast.error('이메일을 입력해주세요.')
       return
     }
 
     // 이메일 형식 검증
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(trimmedEmail)) {
-      alert('이메일 형식이 올바르지 않습니다.')
+      toast.error('이메일 형식이 올바르지 않습니다.')
       return
     }
 
@@ -59,10 +60,10 @@ const [isNameChecked, setIsNameChecked] = useState(false);
       console.log('이메일 중복 확인 응답:', response.data)
 
       if (response.data.ok === 1) {
-        alert('사용 가능한 이메일입니다.')
+        toast.success('사용 가능한 이메일입니다.')
         setIsEmailChecked(true)
       } else {
-        alert('이미 사용 중인 이메일입니다.')
+        toast.error('이미 사용 중인 이메일입니다.')
         setIsEmailChecked(true)
       }
     } catch (error) {
@@ -78,14 +79,14 @@ const [isNameChecked, setIsNameChecked] = useState(false);
 
     // 빈 값일 때
     if (!trimmedName) {
-      alert('닉네임을 입력해주세요.')
+      toast.error('닉네임을 입력해주세요.')
       return
     }
 
     // 닉네임 유효성 (2자~10자, 한글/영문/숫자)
     const nameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/
     if (!nameRegex.test(trimmedName)) {
-      alert("닉네임은 2~10자, 한글/영문/숫자만 가능합니다.")
+      toast.error('닉네임은 2~10자, 한글/영문/숫자만 가능합니다.')
       return
     }
 
@@ -96,10 +97,10 @@ const [isNameChecked, setIsNameChecked] = useState(false);
       console.log('닉네임 중복 확인 응답:', response.data);
 
       if (response.data.ok === 1) {
-        alert('사용 가능한 닉네임입니다.')
+        toast.success('사용 가능한 닉네임입니다.')
         setIsNameChecked(true)
       } else {
-        alert('이미 사용 중인 닉네임입니다.')
+        toast.error('이미 사용 중인 닉네임입니다.')
         setIsNameChecked(true)
       }
       } catch (error) {
@@ -124,50 +125,50 @@ const [isNameChecked, setIsNameChecked] = useState(false);
 
     // 1. 빈 값 체크
     if (!trimmedEmail || !trimmedName || !password || !passwordConfirm || !address.trim()) {
-      alert("모든 항목을 입력해주세요.")
+      toast.error('모든 항목을 입력해주세요.')
       return
     }
 
     // 2. 이메일 형식 체크
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(trimmedEmail)) {
-      alert("이메일 형식이 올바르지 않습니다.")
+      toast.error('이메일 형식이 올바르지 않습니다.')
       return
     }
 
     if (!isEmailChecked) {
-      alert("이메일 중복확인을 해주세요.")
+      toast.error('이메일 중복확인을 해주세요.')
     return
     }
 
     // 3. 닉네임 유효성 체크
     const nameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/
     if (!nameRegex.test(trimmedName)) {
-      alert("닉네임은 2~10자, 한글/영문/숫자만 가능합니다.")
+      toast.error('닉네임은 2~10자, 한글/영문/숫자만 가능합니다.')
       return
     }
 
     if (!isNameChecked) {
-      alert("닉네임 중복확인을 해주세요.")
+      toast.error('닉네임 중복확인을 해주세요.')
     return
     }
 
     // 4. 비밀번호 길이
       if (password.length < 8) {
-      alert("비밀번호는 8자 이상이어야 합니다.")
+      toast.error('비밀번호는 8자 이상이어야 합니다.')
       return
     }
 
     // 5) 비밀번호 형식 체크
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
     if (!passwordRegex.test(password)) {
-      alert("비밀번호는 영문과 숫자를 포함해야 합니다.")
+      toast.error('비밀번호는 영문과 숫자를 포함해야 합니다.')
       return
     }
 
     // 6) 비밀번호 일치
     if (password !== passwordConfirm) {
-      alert("비밀번호가 일치하지 않습니다.")
+      toast.error('비밀번호가 일치하지 않습니다.')
       return
     }
 
@@ -201,11 +202,11 @@ const [isNameChecked, setIsNameChecked] = useState(false);
         }
         setUser(userData, true) //  바로 로그인
 
-        alert('회원가입 성공!')
+        toast.success('회원가입 성공!')
         router.push('/')
       } 
     } else {
-        alert('회원가입에 실패했습니다.')
+        toast.error('회원가입에 실패했습니다.')
       }
       } catch (error) {
         console.error('회원가입 에러:', error)

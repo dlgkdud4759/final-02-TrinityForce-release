@@ -20,6 +20,7 @@ import type { UserDetail } from '@/types/user';
 import { getAxios } from '@/utils/axios';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/zustand/useUserStore';
+import toast from 'react-hot-toast'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -82,11 +83,11 @@ export default function MyPage() {
       const updatedUser = { ...user, image: imagePath } as UserDetail;
       setUser(updatedUser);
       setLocalUser(updatedUser);
-
-      alert('프로필 사진이 변경되었습니다!');
+      
+      toast.success('프로필 사진이 변경되었습니다!');
     } catch (error) {
       console.error('업로드 에러:', error);
-      alert('사진 업로드에 실패했습니다.');
+      toast.error('사진 업로드에 실패했습니다.')
     } finally {
       setIsUploading(false);
     }
@@ -104,11 +105,11 @@ export default function MyPage() {
       const updatedUser = { ...user, image: '' } as UserDetail;
       setUser(updatedUser);
       setLocalUser(updatedUser);
-
-      alert('프로필 사진이 삭제되었습니다!');
+      
+      toast.success('프로필 사진이 삭제되었습니다!')
     } catch (error) {
       console.error('삭제 에러:', error);
-      alert('삭제에 실패했습니다.');
+      toast.error('삭제에 실패했습니다.')
     }
   };
 
@@ -120,10 +121,10 @@ export default function MyPage() {
 
   // 회원 탈퇴 처리
   const handleWithdrawal = async () => {
-    alert('회원 탈퇴 기능은 준비 중입니다.');
-    setShowWithdrawalModal(false);
-  };
-
+  toast('회원 탈퇴 기능은 준비 중입니다.')
+  setShowWithdrawalModal(false);
+};
+  
   return (
     <div className="min-h-screen w-full bg-bg-primary">
       <HeaderSub title="내 정보" />
@@ -272,7 +273,7 @@ export default function MyPage() {
 
           {/* 차단 목록 */}
           <button
-            onClick={() => alert('준비 중인 기능입니다.')}
+            onClick={() => toast('준비 중인 기능입니다.')}
             className="w-full flex items-center px-4 py-3 hover:bg-gray-light transition text-left opacity-50 cursor-not-allowed"
           >
             <BlockIcon className="w-5 h-5 mr-3" />

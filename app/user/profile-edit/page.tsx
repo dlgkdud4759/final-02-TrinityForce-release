@@ -11,6 +11,7 @@ import { getAxios, handleAxiosError } from "@/utils/axios"
 import type { UserDetail } from "@/types/user"
 import Script from "next/script"
 import { useUserStore } from "@/zustand/useUserStore"
+import toast from 'react-hot-toast'
 
 
 declare global {
@@ -45,17 +46,17 @@ export default function ProfileEditPage() {
   // 닉네임 중복 확인
   const handleCheckNickname = async () => {
     if (!nickname.trim()) {
-      alert('닉네임을 입력해주세요.')
+      toast.error('닉네임을 입력해주세요.')
       return
     }
     
     if (nickname.length < 2 || nickname.length > 10) {
-      alert('닉네임은 2~10자로 입력해주세요.')
+      toast.error('닉네임은 2~10자로 입력해주세요.')
       return
     }
     
     if (nickname === currentUser?.name) {
-      alert('현재 닉네임과 동일합니다.')
+      toast.error('현재 닉네임과 동일합니다.')
       return
     }
     
@@ -64,10 +65,10 @@ export default function ProfileEditPage() {
       const response = await axios.get(`/users?name=${nickname}`)
       
       if (response.data.item.length > 0) {
-        alert('이미 사용 중인 닉네임입니다.')
+        toast.error('이미 사용 중인 닉네임입니다.')
         setIsNicknameAvailable(false)
       } else {
-        alert('사용 가능한 닉네임입니다.')
+        toast.success('사용 가능한 닉네임입니다.')
         setIsNicknameChecked(true)
         setIsNicknameAvailable(true)
       }
@@ -86,7 +87,7 @@ export default function ProfileEditPage() {
     // 주소 검색
     const handleAddressSearch = () => {
     if (typeof window === 'undefined' || !window.daum) {
-      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
+      toast('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
       return
     }
     new window.daum.Postcode({
@@ -104,12 +105,12 @@ export default function ProfileEditPage() {
 
 
     if (!isNicknameChanged && !isAddressChanged) {
-      alert('변경사항이 없습니다.')
+      toast('변경사항이 없습니다.')
       return
     }
     
     if (isNicknameChanged && (!isNicknameChecked || !isNicknameAvailable)) {
-      alert('닉네임 중복 확인을 해주세요.')
+      toast.error('닉네임 중복 확인을 해주세요.')
       return
     }
     
@@ -126,7 +127,7 @@ export default function ProfileEditPage() {
       setLocalUser(updatedUser)
       setUser(updatedUser, true)
       
-      alert('프로필이 변경되었습니다!')
+      toast.success('프로필이 변경되었습니다!')
       router.push('/user/mypage')
     } catch (error) {
       console.error('닉네임 변경 에러:', error)
@@ -137,23 +138,23 @@ export default function ProfileEditPage() {
   // 비밀번호 변경
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      alert('모든 항목을 입력해주세요.')
+      toast.error('모든 항목을 입력해주세요.')
       return
     }
     
     if (newPassword.length < 8) {
-      alert('새 비밀번호는 8자 이상이어야 합니다.')
+      toast.error('새 비밀번호는 8자 이상이어야 합니다.')
       return
     }
     
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
     if (!passwordRegex.test(newPassword)) {
-      alert("비밀번호는 영문과 숫자를 포함해야 합니다.")
+      toast.error('비밀번호는 영문과 숫자를 포함해야 합니다.')
       return
     }
 
     if (newPassword !== confirmPassword) {
-      alert('새 비밀번호가 일치하지 않습니다.')
+      toast.error('새 비밀번호가 일치하지 않습니다.')
       return
     }
     
@@ -164,14 +165,14 @@ export default function ProfileEditPage() {
         currentPassword: currentPassword
       })
       
-      alert('비밀번호가 변경되었습니다!')
+      toast.success('비밀번호가 변경되었습니다!')
       setShowPasswordModal(false)
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (error) {
       console.error('비밀번호 변경 에러:', error)
-      alert('비밀번호 변경에 실패했습니다. 현재 비밀번호를 확인해주세요.')
+      toast.error('비밀번호 변경에 실패했습니다. 현재 비밀번호를 확인해주세요.')
     }
   }
 

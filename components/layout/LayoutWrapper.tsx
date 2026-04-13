@@ -6,7 +6,8 @@ import Navigation from '@/components/layout/Navigation';
 import { LocationModalProvider } from '@/contexts/LocationModalContext';
 
 // HeaderMain을 숨길 페이지 경로들
-const hideHeaderMainPaths = ['/meetup', '/location', '/book-detail'];
+const hideHeaderMainPaths = ['/meetup', '/location', '/book-detail', '/splash'];
+const hideNavigationPaths = ['/splash']
 
 // 상단 패딩이 필요 없는 페이지 경로들
 const noPaddingPaths = ['/location'];
@@ -23,6 +24,9 @@ export default function LayoutWrapper({
   const shouldHidePadding = noPaddingPaths.some((path) =>
     pathname.startsWith(path)
   );
+  const shouldHideNavigation = hideNavigationPaths.some((path) =>
+    pathname.startsWith(path)
+  );
 
   return (
     <LocationModalProvider>
@@ -30,7 +34,7 @@ export default function LayoutWrapper({
       <div className={shouldHidePadding ? '' : 'pt-15'}>
         {children}
       </div>
-      <Navigation />
+      {!shouldHideNavigation && <Navigation />}
     </LocationModalProvider>
   );
 }

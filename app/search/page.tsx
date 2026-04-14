@@ -11,6 +11,14 @@ import { useUserStore } from '@/zustand/useUserStore';
 import { useLocationStore } from '@/zustand/useLocationStore';
 import toast from 'react-hot-toast'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const getImageUrl = (imagePath?: string) => {
+  if (!imagePath) return '/favicon.ico';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${API_URL ?? ''}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
+
 type SearchResult = {
   _id: number;
   name: string;
@@ -52,34 +60,34 @@ export default function SearchPage() {
   const userAddress = locationAddress || user?.address;
 
   // 검색 실행
-  const handleSearch = useCallback(async (keyword: string, category: string) => {
-    if (!keyword.trim()) {
-      toast.error('검색어를 입력해주세요.')
-      return
-    }
-
-    try {
-      setIsLoading(true);
-      setHasSearched(true);
-      setIsFocused(false);
-
-      const axios = getAxios();
-
-      const params: Record<string, string> = {
-        keyword: keyword.trim()
-      };
-
-      // 카테고리 추가
-      if (category !== '전체') {
-        params.custom = JSON.stringify({ "extra.category": category });
+  const handleSearch = useCallback(
+    async (keyword: string, category: string) => {
+      if (!keyword.trim()) {
+        toast.error('검색어를 입력해주세요.');
+        return;
       }
 
+      try {
+        setIsLoading(true);
+        setHasSearched(true);
+        setIsFocused(false);
 
-      const response = await axios.get(`/products`, { params });
+        const axios = getAxios();
 
-      let results = response.data.item || [];
+        const params: Record<string, string> = {
+          keyword: keyword.trim(),
+        };
 
-      // 위치 필터링 (도서의 extra.location 기준)
+        // 카테고리 추가
+        if (category !== '전체') {
+          params.custom = JSON.stringify({ 'extra.category': category });
+        }
+
+        const response = await axios.get(`/products`, { params });
+
+        let results = response.data.item || [];
+
+        // 위치 필터링 (도서의 extra.location 기준)
         if (userAddress) {
           results = results.filter((item: SearchResult) => {
             const bookLocation = item.extra?.location;
@@ -91,25 +99,27 @@ export default function SearchPage() {
           });
         }
 
-      setSearchResults(results);
+        setSearchResults(results);
 
-      // 최근 검색어
-      setRecentSearches(prev => {
-        if (!prev.includes(keyword)) {
-          const newSearches = [keyword, ...prev.slice(0, 9)];
-          localStorage.setItem('recentSearches', JSON.stringify(newSearches));
-          return newSearches;
-        }
-        return prev;
-      });
-    } catch (error) {
-      console.error('검색 에러', error);
-      handleAxiosError(error);
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userAddress]);
+        // 최근 검색어
+        setRecentSearches((prev) => {
+          if (!prev.includes(keyword)) {
+            const newSearches = [keyword, ...prev.slice(0, 9)];
+            localStorage.setItem('recentSearches', JSON.stringify(newSearches));
+            return newSearches;
+          }
+          return prev;
+        });
+      } catch (error) {
+        console.error('검색 에러', error);
+        handleAxiosError(error);
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userAddress]
+  );
 
   // URL 파라미터로 전달된 검색어 자동 검색
   useEffect(() => {
@@ -136,12 +146,11 @@ export default function SearchPage() {
 
   const handleResultClick = (productId: number) => {
     router.push(`/book-detail/${productId}`);
-  }
+  };
 
   return (
     <div className="min-h-screen w-full bg-bg-primary">
-      <HeaderSub title='검색'
-      backUrl='/'/>
+      <HeaderSub title="검색" backUrl="/" />
       <div className="px-4 py-6 max-w-md mx-auto">
         {/* 위치 표시 */}
         {userAddress && (
@@ -149,7 +158,7 @@ export default function SearchPage() {
             📍 {userAddress} 기준 검색
           </div>
         )}
-        
+
         {/* 검색창 */}
         <SearchInput
           value={searchQuery}
@@ -161,11 +170,11 @@ export default function SearchPage() {
         />
 
         {/* 조건별 렌더링 */}
-{isFocused ? (
+        {isFocused ? (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-font-dark">최근 검색</h2>
-              <button 
+              <button
                 onMouseDown={handleDeleteAllRecent}
                 className="text-sm text-gray-dark"
               >
@@ -175,9 +184,12 @@ export default function SearchPage() {
             {recentSearches.length > 0 ? (
               <ul className="space-y-3">
                 {recentSearches.map((search, index) => (
-                  <li key={index} className="flex items-center justify-between py-2">
+                  <li
+                    key={index}
+                    className="flex items-center justify-between py-2"
+                  >
                     {/* 검색어 */}
-                    <span 
+                    <span
                       className="flex-1 text-font-dark cursor-pointer"
                       onMouseDown={() => {
                         setSearchQuery(search);
@@ -186,10 +198,11 @@ export default function SearchPage() {
                     >
                       {search}
                     </span>
-                    <button 
+                    <button
                       onMouseDown={(e) => {
                         e.preventDefault();
-                        handleDeleteRecent(index)}}
+                        handleDeleteRecent(index);
+                      }}
                       className="text-gray-dark ml-4"
                     >
                       ✕
@@ -212,19 +225,20 @@ export default function SearchPage() {
             <div className="mt-6">
               {searchResults.map((item, index) => (
                 <div key={item._id}>
-                  <div className="flex gap-4 py-4 cursor-pointer hover:bg-gray-light transition rounded-lg px-2"
-                  onClick={() => handleResultClick(item._id)}>
-                    <div className="w-18 h-18 flex-shrink-0">
+                  <div
+                    className="flex gap-4 py-4 cursor-pointer hover:bg-gray-light transition rounded-lg px-2"
+                    onClick={() => handleResultClick(item._id)}
+                  >
+                    <div className="w-18 h-18 shrink-0">
                       <Image
-                        src={item.mainImages[0]?.path || ''}
+                        src={getImageUrl(item.mainImages[0]?.path)}
                         alt={item.name}
                         width={64}
                         height={80}
-                        unoptimized
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-bold text-font-dark mb-1 truncate">
                         {item.name}
@@ -232,12 +246,10 @@ export default function SearchPage() {
                       <p className="text-sm text-font-dark line-clamp-2 mb-2">
                         {item.content}
                       </p>
-                      <p className="text-xs text-gray-dark">
-                        {item.createdAt}
-                      </p>
+                      <p className="text-xs text-gray-dark">{item.createdAt}</p>
                     </div>
                   </div>
-                  
+
                   {index < searchResults.length - 1 && (
                     <div className="border-b border-border-primary" />
                   )}
@@ -245,7 +257,7 @@ export default function SearchPage() {
               ))}
             </div>
           ) : (
-            <EmptyState 
+            <EmptyState
               title="찾으시는 책이 없어요."
               description="다른 검색어를 입력해보세요."
             />

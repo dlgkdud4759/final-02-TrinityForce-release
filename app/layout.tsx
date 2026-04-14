@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import './globals.css';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
@@ -30,9 +30,16 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/Pretendard-Regular.subset.woff2"
+          crossOrigin="anonymous"
+        />
         <Script
           src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&autoload=false`}
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
         />
       </head>
       <body>

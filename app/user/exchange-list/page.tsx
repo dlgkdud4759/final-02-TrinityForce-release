@@ -1,88 +1,100 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import EmptyState from "@/components/ui/EmptyState"
-import HeaderSub from "@/components/layout/HeaderSub"
-import { getAxios, handleAxiosError } from "@/utils/axios"
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import EmptyState from '@/components/ui/EmptyState';
+import HeaderSub from '@/components/layout/HeaderSub';
+import { getAxios, handleAxiosError } from '@/utils/axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const getImageUrl = (imagePath?: string) => {
+  if (!imagePath) return '/favicon.ico';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${API_URL ?? ''}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 type Order = {
-  _id: number
+  _id: number;
   products: {
-    _id: number
-    name: string
+    _id: number;
+    name: string;
     image: {
-      path: string
-      name: string
-    }
+      path: string;
+      name: string;
+    };
     extra?: {
-      author?: string
-      category?: string
-    }
+      author?: string;
+      category?: string;
+    };
     seller?: {
-      _id: number
-      name: string
-      image?: string
-    }
-  }[]
-  state: string
-  createdAt: string
-  user_id: number
+      _id: number;
+      name: string;
+      image?: string;
+    };
+  }[];
+  state: string;
+  createdAt: string;
+  user_id: number;
   user?: {
-    _id: number
-    name: string
-    image?: string
-  }
-}
+    _id: number;
+    name: string;
+    image?: string;
+  };
+};
 
 export default function ExchangeListPage() {
-  const router = useRouter()
-  const [activeTab, setActiveTab] = useState<"requested" | "received">("requested")
-  const [exchanges, setExchanges] = useState<Order[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'requested' | 'received'>(
+    'requested'
+  );
+  const [exchanges, setExchanges] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 교환 목록 불러오기
   useEffect(() => {
-    fetchExchanges()
-  }, [activeTab])
+    fetchExchanges();
+  }, [activeTab]);
 
   const fetchExchanges = async () => {
     try {
-      setIsLoading(true)
-      const axios = getAxios()
-      let response
+      setIsLoading(true);
+      const axios = getAxios();
+      let response;
 
-      if (activeTab === "requested") {
+      if (activeTab === 'requested') {
         // 내가 신청한 교환
-        response = await axios.get('/orders/')
-        console.log('신청한 교환:', response.data)
-        
+        response = await axios.get('/orders/');
+        console.log('신청한 교환:', response.data);
+
         if (response.data.ok) {
-          setExchanges(response.data.item || [])
+          setExchanges(response.data.item || []);
         }
       } else {
         // 내 책에 신청 온 교환
-        response = await axios.get('/seller/orders/')
-        console.log('받은 교환:', response.data)
-        
+        response = await axios.get('/seller/orders/');
+        console.log('받은 교환:', response.data);
+
         if (response.data.ok) {
-          const orders = Array.isArray(response.data.item) 
-            ? response.data.item 
-            : response.data.item ? [response.data.item] : []
-          setExchanges(orders)
+          const orders = Array.isArray(response.data.item)
+            ? response.data.item
+            : response.data.item
+              ? [response.data.item]
+              : [];
+          setExchanges(orders);
         }
       }
     } catch (error) {
-      console.error('교환 목록 에러:', error)
-      handleAxiosError(error)
-      setExchanges([])
+      console.error('교환 목록 에러:', error);
+      handleAxiosError(error);
+      setExchanges([]);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const isEmpty = exchanges.length === 0
+  const isEmpty = exchanges.length === 0;
 
   if (isLoading) {
     return (
@@ -92,7 +104,7 @@ export default function ExchangeListPage() {
           <p className="text-gray-dark">로딩 중...</p>
         </div>
       </>
-    )
+    );
   }
 
   return (
@@ -102,21 +114,21 @@ export default function ExchangeListPage() {
         {/* 탭 */}
         <div className="flex mb-6">
           <button
-            onClick={() => setActiveTab("requested")}
+            onClick={() => setActiveTab('requested')}
             className={`flex-1 pb-2 text-base font-medium border-b-2 transition ${
-              activeTab === "requested"
-                ? "border-brown-accent text-font-dark"
-                : "border-transparent text-gray-dark"
+              activeTab === 'requested'
+                ? 'border-brown-accent text-font-dark'
+                : 'border-transparent text-gray-dark'
             }`}
           >
             내가 고른 책
           </button>
           <button
-            onClick={() => setActiveTab("received")}
+            onClick={() => setActiveTab('received')}
             className={`flex-1 pb-2 text-base font-medium border-b-2 transition ${
-              activeTab === "received"
-                ? "border-brown-accent text-font-dark"
-                : "border-transparent text-gray-dark"
+              activeTab === 'received'
+                ? 'border-brown-accent text-font-dark'
+                : 'border-transparent text-gray-dark'
             }`}
           >
             내가 내놓은 책
@@ -127,14 +139,14 @@ export default function ExchangeListPage() {
         {isEmpty ? (
           <EmptyState
             title={
-              activeTab === "requested"
-                ? "아직 신청한 교환이 없어요."
-                : "아직 받은 교환 신청이 없어요."
+              activeTab === 'requested'
+                ? '아직 신청한 교환이 없어요.'
+                : '아직 받은 교환 신청이 없어요.'
             }
             description={
-              activeTab === "requested"
-                ? "마음에 드는 책을 찾아 교환을 신청해보세요!"
-                : "내 책에 관심을 가진 사람들이 곧 나타날 거예요."
+              activeTab === 'requested'
+                ? '마음에 드는 책을 찾아 교환을 신청해보세요!'
+                : '내 책에 관심을 가진 사람들이 곧 나타날 거예요.'
             }
           />
         ) : (
@@ -143,18 +155,19 @@ export default function ExchangeListPage() {
             {exchanges.map((item, index) => (
               <div key={item._id}>
                 {/* 목록 아이템 */}
-                <div 
+                <div
                   className="flex gap-4 py-4 cursor-pointer hover:bg-gray-50 transition rounded-lg px-2"
-                  onClick={() => router.push(`/book-detail/${item.products[0]._id}`)}
+                  onClick={() =>
+                    router.push(`/book-detail/${item.products[0]._id}`)
+                  }
                 >
                   {/* 책 이미지 */}
-                  <div className="w-18 h-18 flex-shrink-0">
+                  <div className="w-18 h-18 shrink-0">
                     <Image
-                      src={item.products[0].image.path || '/favicon.ico'}
+                      src={getImageUrl(item.products[0].image.path)}
                       alt={item.products[0].name}
                       width={64}
                       height={80}
-                      unoptimized
                       className="w-full h-full object-cover rounded"
                     />
                   </div>
@@ -170,14 +183,11 @@ export default function ExchangeListPage() {
                       </p>
                     )}
                     <p className="text-xs text-gray-dark mb-2">
-                      {activeTab === "requested" 
+                      {activeTab === 'requested'
                         ? `교환자: ${item.products[0].seller?.name || item.user?.name || '알 수 없음'}`
-                        : `교환자: ${item.user?.name || '알 수 없음'}`
-                      }
+                        : `교환자: ${item.user?.name || '알 수 없음'}`}
                     </p>
-                    <p className="text-xs text-gray-dark">
-                      {item.createdAt}
-                    </p>
+                    <p className="text-xs text-gray-dark">{item.createdAt}</p>
                   </div>
                 </div>
 
@@ -191,5 +201,5 @@ export default function ExchangeListPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,42 +1,50 @@
 'use client';
 
-import Link from "next/link"
-import Image from "next/image"
-import { AlertIcon } from "@/app/components/icons/Alert"
-import { BlockIcon } from "@/app/components/icons/Block"
-import { EditIcon } from "@/app/components/icons/Edit"
-import { ExchangeIcon } from "@/app/components/icons/Exchange"
-import { HeartFilledIcon } from "@/app/components/icons/HeartFilled"
-import { LogOutIcon } from "@/app/components/icons/LogOut"
-import { PostIcon } from "@/app/components/icons/Post"
-import { ProfileIcon } from "@/app/components/icons/Profile"
-import { ReviewsIcon } from "@/app/components/icons/Reviews"
-import { WithdrawalIcon } from "@/app/components/icons/Withdrawal"
-import HeaderSub from "@/components/layout/HeaderSub"
-import Modal from "@/components/ui/Modal"
+import Link from 'next/link';
+import Image from 'next/image';
+import { AlertIcon } from '@/app/components/icons/Alert';
+import { BlockIcon } from '@/app/components/icons/Block';
+import { EditIcon } from '@/app/components/icons/Edit';
+import { ExchangeIcon } from '@/app/components/icons/Exchange';
+import { HeartFilledIcon } from '@/app/components/icons/HeartFilled';
+import { LogOutIcon } from '@/app/components/icons/LogOut';
+import { PostIcon } from '@/app/components/icons/Post';
+import { ProfileIcon } from '@/app/components/icons/Profile';
+import { ReviewsIcon } from '@/app/components/icons/Reviews';
+import { WithdrawalIcon } from '@/app/components/icons/Withdrawal';
+import HeaderSub from '@/components/layout/HeaderSub';
+import Modal from '@/components/ui/Modal';
 import { getUser, setUser as setLocalUser } from '@/utils/user';
 import { useState, useRef } from 'react';
 import type { UserDetail } from '@/types/user';
 import { getAxios } from '@/utils/axios';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/zustand/useUserStore';
-import toast from 'react-hot-toast'
+import toast from 'react-hot-toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const getImageUrl = (imagePath?: string) => {
+  if (!imagePath) return '/favicon.ico';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${API_URL ?? ''}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 export default function MyPage() {
   const router = useRouter();
   const logout = useUserStore((state) => state.logout);
-  
+
   const [user, setUser] = useState<UserDetail | null>(() => {
     if (typeof window !== 'undefined') {
       return getUser();
     }
     return null;
   });
-  
+
   const [showMenu, setShowMenu] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
@@ -57,29 +65,29 @@ export default function MyPage() {
 
     try {
       setIsUploading(true);
-      
+
       const axios = getAxios();
       const formData = new FormData();
       formData.append('attach', file);
-      
+
       const uploadResponse = await axios.post('/files/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
+
       const imagePath = uploadResponse.data.item[0].path;
-      
+
       await axios.patch(`/users/${user?._id}`, {
-        image: imagePath
+        image: imagePath,
       });
-      
+
       const updatedUser = { ...user, image: imagePath } as UserDetail;
       setUser(updatedUser);
       setLocalUser(updatedUser);
-      
+
       toast.success('프로필 사진이 변경되었습니다!');
     } catch (error) {
       console.error('업로드 에러:', error);
-      toast.error('사진 업로드에 실패했습니다.')
+      toast.error('사진 업로드에 실패했습니다.');
     } finally {
       setIsUploading(false);
     }
@@ -89,19 +97,19 @@ export default function MyPage() {
     setShowMenu(false);
     try {
       const axios = getAxios();
-      
+
       await axios.patch(`/users/${user?._id}`, {
-        image: ''
+        image: '',
       });
-      
+
       const updatedUser = { ...user, image: '' } as UserDetail;
       setUser(updatedUser);
       setLocalUser(updatedUser);
-      
-      toast.success('프로필 사진이 삭제되었습니다!')
+
+      toast.success('프로필 사진이 삭제되었습니다!');
     } catch (error) {
       console.error('삭제 에러:', error);
-      toast.error('삭제에 실패했습니다.')
+      toast.error('삭제에 실패했습니다.');
     }
   };
 
@@ -113,13 +121,13 @@ export default function MyPage() {
 
   // 회원 탈퇴 처리
   const handleWithdrawal = async () => {
-  toast('회원 탈퇴 기능은 준비 중입니다.')
-  setShowWithdrawalModal(false);
-};
-  
+    toast('회원 탈퇴 기능은 준비 중입니다.');
+    setShowWithdrawalModal(false);
+  };
+
   return (
     <div className="min-h-screen w-full bg-bg-primary">
-      <HeaderSub title="내 정보"/>
+      <HeaderSub title="내 정보" />
       <div className="px-4 py-6 max-w-md mx-auto">
         {/* 프로필 카드 */}
         <div className="bg-white rounded-2xl p-6 mb-4 flex flex-col items-center">
@@ -127,12 +135,11 @@ export default function MyPage() {
           <div className="relative mb-3">
             <div className="w-20 h-20 bg-brown-accent rounded-full flex items-center justify-center overflow-hidden">
               {user?.image ? (
-                <Image 
-                  src={user.image} 
+                <Image
+                  src={getImageUrl(user.image)}
                   alt={user.name || '프로필'}
                   width={80}
                   height={80}
-                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -141,16 +148,16 @@ export default function MyPage() {
                 </span>
               )}
             </div>
-            
+
             {/* 수정 버튼 */}
-            <button 
+            <button
               onClick={handleEditClick}
               disabled={isUploading}
               className="absolute bottom-0 right-0 w-7 h-7 bg-gray-light rounded-full border-5 border-white flex items-center justify-center"
             >
               {isUploading ? '...' : <EditIcon className="w-4 h-4" />}
             </button>
-            
+
             {/* 메뉴 */}
             {showMenu && (
               <div className="absolute bottom-10 right-0 bg-white rounded-lg shadow-lg py-2 min-w-[120px] z-10">
@@ -173,18 +180,18 @@ export default function MyPage() {
           </div>
 
           {/* 파일 탐색기 */}
-          <input 
+          <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleFileChange}
             className="hidden"
           />
-          
+
           {/* 닉네임 */}
           <p className="text-lg font-bold text-font-dark mb-1">
             {user?.name || '닉네임'}
-          </p>         
+          </p>
           {/* 이메일 */}
           <p className="text-sm text-gray-dark">
             {user?.email || 'example@gmail.com'}
@@ -193,8 +200,8 @@ export default function MyPage() {
 
         {/* 프로필 수정 */}
         <div className="bg-white rounded-2xl mb-4 overflow-hidden">
-          <Link 
-            href="/user/profile-edit" 
+          <Link
+            href="/user/profile-edit"
             className="flex items-center px-4 py-3 hover:bg-gray-light transition"
           >
             <ProfileIcon className="w-5 h-5 mr-3" />
@@ -205,8 +212,8 @@ export default function MyPage() {
         {/* 목록 그룹 */}
         <div className="bg-white rounded-2xl mb-4 overflow-hidden">
           {/* 교환 목록 */}
-          <Link 
-            href="/user/exchange-list" 
+          <Link
+            href="/user/exchange-list"
             className="flex items-center px-4 py-3 border-b border-border-primary hover:bg-gray-light transition"
           >
             <ExchangeIcon className="w-5 h-5 mr-3" />
@@ -214,8 +221,8 @@ export default function MyPage() {
           </Link>
 
           {/* 관심 목록 */}
-          <Link 
-            href="/user/wishlist" 
+          <Link
+            href="/user/wishlist"
             className="flex items-center px-4 py-3 border-b border-border-primary hover:bg-gray-light transition"
           >
             <HeartFilledIcon className="w-5 h-5 mr-3" />
@@ -223,8 +230,8 @@ export default function MyPage() {
           </Link>
 
           {/* 최근 본 글 */}
-          <Link 
-            href="/user/recent" 
+          <Link
+            href="/user/recent"
             className="flex items-center px-4 py-3 border-b border-border-primary hover:bg-gray-light transition"
           >
             <PostIcon className="w-5 h-5 mr-3" />
@@ -232,8 +239,8 @@ export default function MyPage() {
           </Link>
 
           {/* 후기 목록 */}
-          <Link 
-            href="/user/reviews" 
+          <Link
+            href="/user/reviews"
             className="flex items-center px-4 py-3 hover:bg-gray-light transition"
           >
             <ReviewsIcon className="w-5 h-5 mr-3" />
@@ -250,15 +257,17 @@ export default function MyPage() {
               <span className="text-font-dark">알림</span>
             </div>
             {/* 토글 버튼 */}
-            <button 
+            <button
               onClick={() => setIsNotificationOn(!isNotificationOn)}
               className={`relative w-12 h-6 rounded-full transition ${
                 isNotificationOn ? 'bg-brown-accent' : 'bg-gray-light'
               }`}
             >
-              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                isNotificationOn ? 'right-0.5' : 'left-0.5'
-              }`}></div>
+              <div
+                className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                  isNotificationOn ? 'right-0.5' : 'left-0.5'
+                }`}
+              ></div>
             </button>
           </div>
 
@@ -275,7 +284,7 @@ export default function MyPage() {
         {/* 로그아웃/탈퇴 목록 */}
         <div className="bg-white rounded-2xl overflow-hidden">
           {/* 로그아웃 */}
-          <button 
+          <button
             onClick={() => setShowLogoutModal(true)}
             className="w-full flex items-center px-4 py-3 border-b border-border-primary hover:bg-gray-light transition text-left"
           >
@@ -284,7 +293,7 @@ export default function MyPage() {
           </button>
 
           {/* 회원 탈퇴 */}
-          <button 
+          <button
             onClick={() => setShowWithdrawalModal(true)}
             className="w-full flex items-center px-4 py-3 hover:bg-gray-light transition text-left"
           >
@@ -317,11 +326,16 @@ export default function MyPage() {
       </Modal>
 
       {/* 회원 탈퇴 모달 */}
-      <Modal isOpen={showWithdrawalModal} onClose={() => setShowWithdrawalModal(false)}>
+      <Modal
+        isOpen={showWithdrawalModal}
+        onClose={() => setShowWithdrawalModal(false)}
+      >
         <div className="text-center pt-6">
           <h2 className="text-xl font-bold text-font-dark mb-4">회원 탈퇴</h2>
           <p className="text-gray-dark mb-2">정말 탈퇴하시겠습니까?</p>
-          <p className="text-sm text-red-like mb-6">탈퇴 시 모든 데이터가 삭제됩니다.</p>
+          <p className="text-sm text-red-like mb-6">
+            탈퇴 시 모든 데이터가 삭제됩니다.
+          </p>
           <div className="flex gap-3">
             <button
               onClick={() => setShowWithdrawalModal(false)}
@@ -339,5 +353,5 @@ export default function MyPage() {
         </div>
       </Modal>
     </div>
-  )
+  );
 }

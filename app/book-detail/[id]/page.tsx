@@ -17,6 +17,7 @@ interface ProductData {
     image?: string;
   };
   bookmarks?: number;
+  likes?: number;
   extra?: {
     isBook?: boolean;
     author?: string;

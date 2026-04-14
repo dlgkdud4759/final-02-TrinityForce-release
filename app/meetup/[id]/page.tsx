@@ -81,7 +81,8 @@ export default function MeetupPostDetail() {
   const postId = params?.id;
   const router = useRouter();
   const isLoggedIn = useAuthStatus();
-  const { likedPosts, toggleLike, setCurrentUser, loadBookmarksFromServer } = useMeetupLikeStore();
+  const { likedPosts, toggleLike, setCurrentUser, loadBookmarksFromServer } =
+    useMeetupLikeStore();
 
   const [post, setPost] = useState<MeetupPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,12 +280,12 @@ export default function MeetupPostDetail() {
             <div className="flex items-center gap-1 md:gap-2">
               {/* 본인 글이 아닐 때만 좋아요 버튼 표시 */}
               {currentUserId !== displayPost.user?._id ? (
-              <button
-                type="button"
-                aria-label="좋아요"
-                onClick={handleToggleLike}
-                className="flex items-center gap-1 cursor-pointer group"
-              >
+                <button
+                  type="button"
+                  aria-label="좋아요"
+                  onClick={handleToggleLike}
+                  className="flex items-center gap-1 cursor-pointer group"
+                >
                   <Heart
                     size={20}
                     className={`md:w-6 md:h-6 transition-colors ${
@@ -324,6 +325,9 @@ export default function MeetupPostDetail() {
               src={imageUrl}
               alt={displayPost.title}
               fill
+              priority
+              loading="eager"
+              sizes="(max-width: 1024px) 100vw, 1024px"
               className="object-cover"
             />
           </div>
@@ -371,6 +375,7 @@ export default function MeetupPostDetail() {
                         src={getUserImageUrl(comment.user.image) || ''}
                         alt={comment.user?.name || '사용자'}
                         fill
+                        sizes="(min-width: 768px) 48px, 40px"
                         className="object-cover"
                       />
                     ) : (

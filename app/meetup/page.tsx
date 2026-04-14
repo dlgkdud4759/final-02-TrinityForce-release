@@ -31,7 +31,11 @@ const fallbackPost: MeetupPost = {
   title: '한강 작가 함께 읽기',
   content:
     '한강 작가의 작품을 함께 읽고 이야기 나누는 모임입니다. 매주 토요일 오후 2시에 모여서 책에 대한 생각을 나눕니다.',
-  image: { path: '/images/book1.jpg', name: 'book1.jpg', originalname: 'book1.jpg' },
+  image: {
+    path: '/images/book1.jpg',
+    name: 'book1.jpg',
+    originalname: 'book1.jpg',
+  },
   bookmarks: 24,
   user: { _id: 1, name: '책벌레', image: '' },
   createdAt: '2025-01-28',
@@ -43,7 +47,8 @@ export default function Meetup() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [posts, setPosts] = useState<MeetupPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { likedPosts, toggleLike, setCurrentUser, loadBookmarksFromServer } = useMeetupLikeStore();
+  const { likedPosts, toggleLike, setCurrentUser, loadBookmarksFromServer } =
+    useMeetupLikeStore();
   const isLoggedIn = useAuthStatus();
   const router = useRouter();
   const user = useUserStore((state) => state.user);
@@ -104,7 +109,10 @@ export default function Meetup() {
     setPosts((prev) =>
       prev.map((post) =>
         post._id === postId
-          ? { ...post, bookmarks: Math.max(0, (post.bookmarks || 0) + (result ? 1 : -1)) }
+          ? {
+              ...post,
+              bookmarks: Math.max(0, (post.bookmarks || 0) + (result ? 1 : -1)),
+            }
           : post
       )
     );
@@ -121,7 +129,10 @@ export default function Meetup() {
 
   const getImageUrl = (post: MeetupPost) => {
     if (post.image?.path) {
-      if (post.image.path.startsWith('http') || post.image.path.startsWith('/')) {
+      if (
+        post.image.path.startsWith('http') ||
+        post.image.path.startsWith('/')
+      ) {
         return post.image.path;
       }
       return `${API_URL}/${post.image.path}`;
@@ -136,8 +147,13 @@ export default function Meetup() {
 
       {/* 타이틀 영역 */}
       <div className="flex items-center justify-between px-4 py-4 md:px-6 md:py-6 max-w-6xl mx-auto">
-        <h2 className="text-xl md:text-2xl font-bold text-font-dark">모임게시판</h2>
-        <Link href="/meetup/CreatingMeetup" onClick={(e) => handleRequireLogin(e, '/meetup/CreatingMeetup')}>
+        <h2 className="text-xl md:text-2xl font-bold text-font-dark">
+          모임게시판
+        </h2>
+        <Link
+          href="/meetup/CreatingMeetup"
+          onClick={(e) => handleRequireLogin(e, '/meetup/CreatingMeetup')}
+        >
           <Button text="모임생성" />
         </Link>
       </div>
@@ -161,7 +177,10 @@ export default function Meetup() {
       ) : hasSearched && filteredPosts.length === 0 ? (
         /* 검색 결과 없음 */
         <main className="flex flex-col items-center justify-center min-h-[50vh] md:min-h-[60vh] px-4">
-          <Search size={48} className="md:w-16 md:h-16 lg:w-20 lg:h-20 text-gray-medium mb-4 md:mb-6" />
+          <Search
+            size={48}
+            className="md:w-16 md:h-16 lg:w-20 lg:h-20 text-gray-medium mb-4 md:mb-6"
+          />
           <p className="text-[20px] md:text-[24px] lg:text-[28px] font-bold text-gray-dark mb-2">
             찾으시는 모임이 없어요.
           </p>
@@ -183,7 +202,7 @@ export default function Meetup() {
         /* 모임 목록 */
         <main className="px-4 pb-24 md:px-6 max-w-6xl mx-auto">
           <div className="flex flex-col gap-4 md:gap-6">
-            {filteredPosts.map((post) => {
+            {filteredPosts.map((post, index) => {
               const imageUrl = getImageUrl(post);
               return (
                 <Link
@@ -199,6 +218,9 @@ export default function Meetup() {
                         src={imageUrl}
                         alt={post.title}
                         fill
+                        priority={index < 4}
+                        loading={index < 4 ? 'eager' : 'lazy'}
+                        sizes="(max-width: 768px) 96px, (max-width: 1024px) 128px, 160px"
                         className="object-cover"
                       />
                     </div>
@@ -231,11 +253,17 @@ export default function Meetup() {
                           />
                         </button>
                       ) : (
-                        <Heart size={16} className="md:w-5 md:h-5 text-gray-medium" />
+                        <Heart
+                          size={16}
+                          className="md:w-5 md:h-5 text-gray-medium"
+                        />
                       )}
                       <span className="text-sm md:text-base text-gray-medium">
                         {(post.bookmarks || 0) +
-                          (likedPosts.has(post._id) && (post.bookmarks || 0) === 0 ? 1 : 0)}
+                          (likedPosts.has(post._id) &&
+                          (post.bookmarks || 0) === 0
+                            ? 1
+                            : 0)}
                       </span>
                     </div>
                   </div>

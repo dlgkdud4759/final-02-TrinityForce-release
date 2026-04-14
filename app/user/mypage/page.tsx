@@ -20,7 +20,7 @@ import type { UserDetail } from '@/types/user';
 import { getAxios } from '@/utils/axios';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/zustand/useUserStore';
-import toast from 'react-hot-toast'
+import toast from 'react-hot-toast';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -83,11 +83,11 @@ export default function MyPage() {
       const updatedUser = { ...user, image: imagePath } as UserDetail;
       setUser(updatedUser);
       setLocalUser(updatedUser);
-      
+
       toast.success('프로필 사진이 변경되었습니다!');
     } catch (error) {
       console.error('업로드 에러:', error);
-      toast.error('사진 업로드에 실패했습니다.')
+      toast.error('사진 업로드에 실패했습니다.');
     } finally {
       setIsUploading(false);
     }
@@ -105,11 +105,11 @@ export default function MyPage() {
       const updatedUser = { ...user, image: '' } as UserDetail;
       setUser(updatedUser);
       setLocalUser(updatedUser);
-      
-      toast.success('프로필 사진이 삭제되었습니다!')
+
+      toast.success('프로필 사진이 삭제되었습니다!');
     } catch (error) {
       console.error('삭제 에러:', error);
-      toast.error('삭제에 실패했습니다.')
+      toast.error('삭제에 실패했습니다.');
     }
   };
 
@@ -121,10 +121,10 @@ export default function MyPage() {
 
   // 회원 탈퇴 처리
   const handleWithdrawal = async () => {
-  toast('회원 탈퇴 기능은 준비 중입니다.')
-  setShowWithdrawalModal(false);
-};
-  
+    toast('회원 탈퇴 기능은 준비 중입니다.');
+    setShowWithdrawalModal(false);
+  };
+
   return (
     <div className="min-h-screen w-full bg-bg-primary">
       <HeaderSub title="내 정보" />
